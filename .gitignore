@@ -1,0 +1,21 @@
+# Editor files
+.vscode
+
+# Project specific files
+*.log
+*.pem
+data/
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+__debug_bin
+
+# Test binary, built with `go test -c`
+*.test
+
+# Dependency directories
+vendor/
