@@ -10,13 +10,11 @@ import (
 type logShim struct{ t *testing.T }
 
 func (l logShim) Flush()                              {}
-func (l logShim) Fatal(i ...interface{})              { l.t.Fatal(i...) }
-func (l logShim) Fatalf(s string, i ...interface{})   { l.t.Fatalf(s, i...) }
-func (l logShim) Info(i ...interface{})               { l.t.Log(i...) }
-func (l logShim) Infof(s string, i ...interface{})    { l.t.Logf(s, i...) }
-func (l logShim) Verbose(i ...interface{})            { l.t.Log(i...) }
+func (l logShim) Println(i ...interface{})            { l.t.Log(i...) }
+func (l logShim) Printf(s string, i ...interface{})   { l.t.Logf(s, i...) }
+func (l logShim) Verboseln(i ...interface{})          { l.t.Log(i...) }
 func (l logShim) Verbosef(s string, i ...interface{}) { l.t.Logf(s, i...) }
-func (l logShim) Warn(i ...interface{})               { l.t.Error(i...) }
+func (l logShim) Warnln(i ...interface{})             { l.t.Error(i...) }
 func (l logShim) Warnf(s string, i ...interface{})    { l.t.Errorf(s, i...) }
 
 func TestUpdateGameData(t *testing.T) {

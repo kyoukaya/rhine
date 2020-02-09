@@ -54,7 +54,7 @@ type Proxy struct {
 // Interface shim for goproxy.Logger
 func logShim(logger log.Logger) func(format string, v ...interface{}) {
 	return func(format string, v ...interface{}) {
-		logger.Infof(format, v...)
+		logger.Printf(format, v...)
 	}
 }
 
@@ -104,14 +104,16 @@ func NewProxy(options *Options) *Proxy {
 	_, keyStatErr := os.Stat(utils.BinDir + keyPath)
 	// Generate CA if it doesn't exist
 	if os.IsNotExist(certStatErr) || os.IsNotExist(keyStatErr) {
-		proxy.Infof("Generating CA...")
+		proxy.Printf("Generating CA...")
 		if err := utils.GenerateCA(certPath, keyPath); err != nil {
-			proxy.Fatal(err)
+			proxy.Warnln(err)
+			panic(err)
 		}
-		proxy.Infof("Copy and register the created 'cert.pem' with your client.")
+		proxy.Printf("Copy and register the created 'cert.pem' with your client.")
 	}
 	if err := utils.LoadCA(certPath, keyPath); err != nil {
-		proxy.Fatal(err)
+		proxy.Warnln(err)
+		panic(err)
 	}
 
 	server.OnRequest().HandleConnect(goproxy.FuncHttpsHandler(proxy.httpsHandler))
@@ -129,30 +131,32 @@ func (p *Proxy) httpsHandler(host string, ctx *goproxy.ProxyCtx) (*goproxy.Conne
 }
 
 // Start starts the proxy. This is blocking and does not return.
-func (proxy *Proxy) Start() {
+func (p *Proxy) Start() {
 	sigs := make(chan os.Signal)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	// Catch sigint/sigterm and cleanly exit
 	go func() {
 		<-sigs
-		proxy.Infof("Shutting down.\n")
-		proxy.Flush()
-		proxy.Shutdown()
+		p.Printf("Shutting down.\n")
+		p.Flush()
+		p.Shutdown()
 		os.Exit(0)
 	}()
 
 	ipstring := utils.GetOutboundIP()
-	addrSplit := strings.Split(proxy.options.Address, ":")
+	addrSplit := strings.Split(p.options.Address, ":")
 	if len(addrSplit) == 2 {
 		ipstring += ":" + addrSplit[1]
 	}
-	proxy.Infof("proxy server listening on %s", ipstring)
-	proxy.Fatal(http.ListenAndServe(proxy.options.Address, proxy.server))
+	p.Printf("proxy server listening on %s", ipstring)
+	err := http.ListenAndServe(p.options.Address, p.server)
+	p.Warnln(err)
+	panic(err)
 }
 
 // Shutdown calls Shutdown on all modules for all users.
-func (proxy *Proxy) Shutdown() {
-	for _, user := range proxy.users {
+func (p *Proxy) Shutdown() {
+	for _, user := range p.users {
 		for _, cb := range user.shutdownCBs {
 			cb(true)
 		}
@@ -160,27 +164,27 @@ func (proxy *Proxy) Shutdown() {
 }
 
 // GetUser returns a Dispatch for the specified UID
-func (proxy *Proxy) GetUser(UID, region string) *Dispatch {
+func (p *Proxy) GetUser(UID, region string) *Dispatch {
 	rUID := region + "_" + UID
-	proxy.mutex.Lock()
-	defer proxy.mutex.Unlock()
-	return proxy.users[rUID]
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+	return p.users[rUID]
 }
 
 // AddUser records a user's information indexed by their UID, if a record belonging to
 // the specified UID already exists, its hooks will be shutdown and the record will be overwritten.
-func (proxy *Proxy) AddUser(UID, region string) *Dispatch {
-	proxy.mutex.Lock()
-	defer proxy.mutex.Unlock()
+func (p *Proxy) AddUser(UID, region string) *Dispatch {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
 	rUID := region + "_" + UID
 
-	if user, exists := proxy.users[rUID]; exists {
-		proxy.Infof("%s reconnecting. Shutting down mods.", rUID)
+	if user, exists := p.users[rUID]; exists {
+		p.Printf("%s reconnecting. Shutting down mods.", rUID)
 		for _, cb := range user.shutdownCBs {
 			cb(false)
 		}
 	} else {
-		proxy.Infof("User %s logged in", rUID)
+		p.Printf("User %s logged in", rUID)
 	}
 
 	UIDint, err := strconv.Atoi(UID)
@@ -190,9 +194,9 @@ func (proxy *Proxy) AddUser(UID, region string) *Dispatch {
 		UID:    UIDint,
 		Region: region,
 		Hooks:  make(map[string][]*PacketHook),
-		Logger: proxy.Logger,
+		Logger: p.Logger,
 	}
 	d.initMods(modules)
-	proxy.users[rUID] = d
+	p.users[rUID] = d
 	return d
 }

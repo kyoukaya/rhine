@@ -13,6 +13,7 @@ import (
 	"github.com/kyoukaya/rhine/utils"
 	"github.com/kyoukaya/rhine/utils/gamedata/itemtable"
 	"github.com/kyoukaya/rhine/utils/gamedata/stagetable"
+
 	"github.com/tidwall/gjson"
 )
 
@@ -107,13 +108,13 @@ func updateGameData(l log.Logger) {
 	}
 	lastCommit, err := getLatestCommit()
 	if err != nil {
-		l.Warn(err)
+		l.Warnln(err)
 	}
 	// Check cached data commit
 	if isLocalDataCurrent(lastCommit) {
 		return
 	}
-	l.Info("gamedata is outdated, updating...")
+	l.Println("gamedata is outdated, updating...")
 	done := make(chan error)
 	doneCount := 0
 	for _, region := range regionMap {
@@ -125,22 +126,22 @@ func updateGameData(l log.Logger) {
 	for i := 0; i < doneCount; i++ {
 		err = <-done
 		if err != nil {
-			l.Warn(err)
+			l.Warnln(err)
 		}
 	}
 	// write .version file
 	f, err := os.Create(utils.BinDir + "/data/.version")
 	if err != nil {
-		l.Warn(err)
+		l.Warnln(err)
 		return
 	}
 	_, err = f.Write([]byte(lastCommit))
 	if err != nil {
-		l.Warn(err)
+		l.Warnln(err)
 		return
 	}
 	updateChecked = true
-	l.Info("gamedata updated")
+	l.Println("gamedata updated")
 }
 
 func loadExcelJSON(region, table string) []byte {

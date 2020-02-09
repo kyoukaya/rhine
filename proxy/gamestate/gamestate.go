@@ -31,11 +31,11 @@ func (mod *GameState) handleSyncData(data []byte) []byte {
 	defer mod.stateMutex.Unlock()
 	syncData, err := unmarshalSyncData(data)
 	if err != nil {
-		mod.log.Warn(err)
+		mod.log.Warnln(err)
 	}
 	mod.state = &syncData.User
 	if err != nil {
-		mod.log.Warn(err)
+		mod.log.Warnln(err)
 		return data
 	}
 	return data

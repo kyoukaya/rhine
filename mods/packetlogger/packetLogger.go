@@ -34,7 +34,7 @@ func (state *rawPacketLoggerState) handle(op string, data []byte, pktCtx *goprox
 }
 
 func (state *rawPacketLoggerState) Shutdown(bool) {
-	state.Infof("Shutting down packetLogger for %d\n", state.d.UID)
+	state.Printf("Shutting down packetLogger for %d\n", state.d.UID)
 	state.buffer.Flush()
 }
 

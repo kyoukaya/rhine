@@ -16,15 +16,13 @@ import (
 
 // Logger is the levelled logger interface implemented by Log.
 type Logger interface {
-	Fatal(...interface{})
-	Fatalf(string, ...interface{})
 	Flush()
-	Infof(string, ...interface{})
-	Info(...interface{})
+	Printf(string, ...interface{})
+	Println(...interface{})
 	Verbosef(string, ...interface{})
-	Verbose(...interface{})
+	Verboseln(...interface{})
 	Warnf(string, ...interface{})
-	Warn(...interface{})
+	Warnln(...interface{})
 }
 
 // Log provides a simple levelled logger outputing to stdout and a file.
@@ -87,7 +85,7 @@ func (log *Log) output(calldepth int, color func(interface{}) aurora.Value, pref
 
 // Verbose calls output to print to the standard logger, only if program is launched with
 // the verbose flag.
-func (log *Log) Verbose(v ...interface{}) {
+func (log *Log) Verboseln(v ...interface{}) {
 	if log.verbose {
 		log.output(2, aurora.Blue, "INFO ", fmt.Sprintln(v...))
 	}
@@ -101,15 +99,15 @@ func (log *Log) Verbosef(format string, v ...interface{}) {
 	}
 }
 
-// Infof calls Output to print to the standard logger.
-// Arguments are handled in the manner of fmt.Infof.
-func (log *Log) Infof(format string, v ...interface{}) {
+// Printf calls Output to print to the standard logger.
+// Arguments are handled in the manner of fmt.Printf.
+func (log *Log) Printf(format string, v ...interface{}) {
 	log.output(2, aurora.Green, "INFO ", fmt.Sprintf(format, v...))
 }
 
 // Info calls Output to print to the standard logger.
 // Arguments are handled in the manner of fmt.Info.
-func (log *Log) Info(v ...interface{}) {
+func (log *Log) Println(v ...interface{}) {
 	log.output(2, aurora.Green, "INFO ", fmt.Sprintln(v...))
 }
 
@@ -119,20 +117,8 @@ func (log *Log) Warnf(format string, v ...interface{}) {
 	log.output(2, aurora.Red, "WARN ", fmt.Sprintf(format, v...))
 }
 
-// Warn calls Output to print to the standard logger.
+// Warnln calls Output to print to the standard logger.
 // Arguments are handled in the manner of fmt.Infoln.
-func (log *Log) Warn(v ...interface{}) {
+func (log *Log) Warnln(v ...interface{}) {
 	log.output(2, aurora.Red, "WARN ", fmt.Sprintln(v...))
-}
-
-// Fatal is equivalent to Print() followed by a call to os.Exit(1).
-func (log *Log) Fatal(v ...interface{}) {
-	log.output(2, aurora.BrightRed, "FATAL ", fmt.Sprint(v...))
-	os.Exit(1)
-}
-
-// Fatalf is equivalent to Printf() followed by a call to os.Exit(1).
-func (log *Log) Fatalf(format string, v ...interface{}) {
-	log.output(2, aurora.BrightRed, "FATAL ", fmt.Sprintf(format, v...))
-	os.Exit(1)
 }

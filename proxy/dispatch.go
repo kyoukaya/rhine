@@ -66,7 +66,7 @@ func (d *Dispatch) initMods(mods []*rhineModule) {
 		hooks, cb := mod.initFunc(d)
 		d.initHooks(hooks)
 		d.shutdownCBs = append(d.shutdownCBs, cb)
-		d.Infof("%s loaded.", mod.name)
+		d.Printf("%s loaded.", mod.name)
 	}
 	d.sortHooks()
 	d.Verbosef("Mods loaded in %dms", time.Since(startT).Milliseconds())

@@ -52,7 +52,7 @@ func (mod *modState) logDrops(rewards []reward, is3Star bool) {
 	}
 	b, err := json.Marshal(entry)
 	if err != nil {
-		mod.Warn(err)
+		mod.Warnln(err)
 	}
 	mod.fileLogger.Println(string(b))
 }
@@ -70,7 +70,7 @@ func (mod *modState) battleFinish(data []byte) {
 	}
 	battle, err := unmarshalBattleFinish(data)
 	if err != nil {
-		mod.Warn(err)
+		mod.Warnln(err)
 	}
 	if mod.isPractice || battle.ExpScale == 0 {
 		return
@@ -96,7 +96,7 @@ func (mod *modState) battleFinish(data []byte) {
 	}
 	mod.logDrops(rewards, battle.ExpScale == 1.2)
 	dropStr := strings.TrimRight(sbuilder.String(), " ")
-	mod.Infof("Stage %s completed in %ds, drops: %s",
+	mod.Printf("Stage %s completed in %ds, drops: %s",
 		mod.stageTable.Stages[mod.currStage].Code,
 		int(time.Since(*mod.stageStartT).Seconds()),
 		dropStr,
