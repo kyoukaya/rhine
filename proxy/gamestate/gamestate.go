@@ -21,6 +21,7 @@ type GameState struct {
 	state      *statestruct.User
 	stateMutex sync.Mutex
 	log        rhLog.Logger
+	loaded     bool
 }
 
 func (mod *GameState) parseDataDelta(data []byte, op string) {
@@ -54,7 +55,7 @@ func (mod *GameState) StateBarrier() {
 func (mod *GameState) handle(op string, data []byte, pktCtx *goproxy.ProxyCtx) {
 	if op == "S/account/syncData" {
 		go mod.handleSyncData(data)
-	} else {
+	} else if mod.loaded {
 		mod.stateMutex.Lock()
 		go mod.parseDataDelta(data, op)
 	}
@@ -71,6 +72,7 @@ func (mod *GameState) handleSyncData(data []byte) []byte {
 		mod.log.Warnln(err)
 		return data
 	}
+	mod.loaded = true
 	return data
 }
 
