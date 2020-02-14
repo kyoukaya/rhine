@@ -1,50 +1,50 @@
 package statestruct
 
 type User struct {
-	Building Building `json:"building"`
-	Social   struct {
+	Building *Building `json:"building"`
+	Social   *struct {
 		AssistCharList  []AssistCharList `json:"assistCharList"`
 		YesterdayReward YesterdayReward  `json:"yesterdayReward"`
 	} `json:"social"`
 	Ticket     interface{} `json:"ticket"`
-	Gacha      Gacha       `json:"gacha"`
-	OpenServer struct {
+	Gacha      *Gacha      `json:"gacha"`
+	OpenServer *struct {
 		CheckIn    OpenServerCheckIn `json:"checkIn"`
 		ChainLogin ChainLogin        `json:"chainLogin"`
 	} `json:"openServer"`
-	DexNav  DexNav  `json:"dexNav"`
-	Dungeon Dungeon `json:"dungeon"`
-	Shop    Shop    `json:"shop"`
-	Skin    struct {
+	DexNav  *DexNav  `json:"dexNav"`
+	Dungeon *Dungeon `json:"dungeon"`
+	Shop    *Shop    `json:"shop"`
+	Skin    *struct {
 		CharacterSkins map[string]int64 `json:"characterSkins"`
 	} `json:"skin"`
-	PushFlags PushFlags   `json:"pushFlags"`
-	Troop     Troop       `json:"troop"`
-	CheckIn   UserCheckIn `json:"checkIn"`
-	Activity  struct {
+	PushFlags *PushFlags   `json:"pushFlags"`
+	Troop     *Troop       `json:"troop"`
+	CheckIn   *UserCheckIn `json:"checkIn"`
+	Activity  *struct {
 		Default     interface{}            `json:"DEFAULT"`
 		MissionOnly map[string]interface{} `json:"MISSION_ONLY"`
 	} `json:"activity"`
-	Mission          Mission `json:"mission"`
-	CollectionReward struct {
+	Mission          *Mission `json:"mission"`
+	CollectionReward *struct {
 		Team map[string]int64 `json:"team"`
 	} `json:"collectionReward"`
-	Recruit    Recruit                              `json:"recruit"`
-	Status     UserStatus                           `json:"status"`
+	Recruit    *Recruit                             `json:"recruit"`
+	Status     *UserStatus                          `json:"status"`
 	Consumable map[string]map[string]ConsumableInfo `json:"consumable"`
 	Inventory  map[string]int64                     `json:"inventory"`
-	Event      struct {
+	Event      *struct {
 		Building int64 `json:"building"`
 	} `json:"event"`
 }
 
 type Building struct {
-	Status struct {
+	Status *struct {
 		Labor Labor `json:"labor"`
 	} `json:"status"`
 	Chars     map[string]BuildingChar `json:"chars"`
 	RoomSlots map[string]RoomSlot     `json:"roomSlots"`
-	Rooms     Rooms                   `json:"rooms"`
+	Rooms     *Rooms                  `json:"rooms"`
 	Furniture map[string]struct {
 		Count int64 `json:"count"`
 		InUse int64 `json:"inUse"`
@@ -271,7 +271,7 @@ type StockElement struct {
 	InstID   int64  `json:"instId"`
 	Delivery []Gain `json:"delivery"`
 	Type     string `json:"type"`
-	Gain     Gain   `json:"gain"`
+	Gain     *Gain  `json:"gain"`
 }
 
 type Gain struct {
@@ -282,11 +282,11 @@ type Gain struct {
 
 type WorkshopInfo struct {
 	Buff struct {
-		Rate struct {
+		Rate *struct {
 			All       int64   `json:"all"`
 			WBuilding float64 `json:"W_BUILDING"`
 		} `json:"rate"`
-		Cost struct {
+		Cost *struct {
 			Type      string `json:"type"`
 			Limit     int64  `json:"limit"`
 			Reduction int64  `json:"reduction"`
@@ -316,9 +316,9 @@ type ConsumableInfo struct {
 
 type DexNav struct {
 	Character map[string]Character        `json:"character"`
-	Formula   Formula                     `json:"formula"`
+	Formula   *Formula                    `json:"formula"`
 	Team      map[string]map[string]int64 `json:"team"`
-	Enemy     Enemy                       `json:"enemy"`
+	Enemy     *Enemy                      `json:"enemy"`
 }
 
 type Character struct {
@@ -339,7 +339,7 @@ type Formula struct {
 
 type Dungeon struct {
 	Stages    map[string]StageValue `json:"stages"`
-	Campaigns Campaigns             `json:"campaigns"`
+	Campaigns *Campaigns            `json:"campaigns"`
 }
 
 type Campaigns struct {
@@ -377,15 +377,15 @@ type GachaInfo struct {
 }
 
 type Mission struct {
-	Missions       Missions         `json:"missions"`
-	MissionRewards MissionRewards   `json:"missionRewards"`
+	Missions       *Missions        `json:"missions"`
+	MissionRewards *MissionRewards  `json:"missionRewards"`
 	MissionGroups  map[string]int64 `json:"missionGroups"`
 }
 
 type MissionRewards struct {
-	DailyPoint  int64   `json:"dailyPoint"`
-	WeeklyPoint int64   `json:"weeklyPoint"`
-	Rewards     Rewards `json:"rewards"`
+	DailyPoint  int64    `json:"dailyPoint"`
+	WeeklyPoint int64    `json:"weeklyPoint"`
+	Rewards     *Rewards `json:"rewards"`
 }
 
 type Rewards struct {
@@ -431,7 +431,7 @@ type PushFlags struct {
 }
 
 type Recruit struct {
-	Normal RecruitNormal `json:"normal"`
+	Normal *RecruitNormal `json:"normal"`
 }
 
 type RecruitNormal struct {
@@ -454,22 +454,22 @@ type SelectTag struct {
 }
 
 type Shop struct {
-	LS struct {
+	LS *struct {
 		CurShopID  string `json:"curShopId"`
 		CurGroupID string `json:"curGroupId"`
 		Info       []Info `json:"info"`
 	} `json:"LS"`
-	HS struct {
+	HS *struct {
 		CurShopID    string      `json:"curShopId"`
 		Info         []Info      `json:"info"`
 		ProgressInfo interface{} `json:"progressInfo"`
 	} `json:"HS"`
-	ES struct {
+	ES *struct {
 		CurShopID string `json:"curShopId"`
 		Info      []Info `json:"info"`
 	} `json:"ES"`
 	Cash InfoSlice `json:"CASH"`
-	GP   struct {
+	GP   *struct {
 		OneTime InfoSlice `json:"oneTime"`
 		Level   InfoSlice `json:"level"`
 		Weekly  Monthly   `json:"weekly"`
@@ -581,7 +581,7 @@ type Skill struct {
 }
 
 type Squad struct {
-	SquadID string            `json:"squadId"`
-	Name    string            `json:"name"`
-	Slots   []*AssistCharList `json:"slots"`
+	SquadID string           `json:"squadId"`
+	Name    string           `json:"name"`
+	Slots   []AssistCharList `json:"slots"`
 }

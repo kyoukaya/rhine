@@ -9,5 +9,8 @@ require (
 	github.com/logrusorgru/aurora v0.0.0-20190803045625-94edacc10f9b
 	github.com/mattn/go-colorable v0.1.2
 	github.com/stretchr/testify v1.3.0 // indirect
+	github.com/svyotov/mergo v0.3.8-0.20200112031012-8eabc023857f
 	github.com/tidwall/gjson v1.4.0
+	golang.org/x/sys v0.0.0-20190412213103-97732733099d // indirect
+	gopkg.in/yaml.v2 v2.2.8 // indirect
 )

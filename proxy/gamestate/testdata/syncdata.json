@@ -1,0 +1,209 @@
+{
+    "user": {
+        "building": {
+            "rooms": {
+                "ELEVATOR": {
+                    "slot_1": {},
+                    "slot_11": {},
+                    "slot_18": {},
+                    "slot_21": {},
+                    "slot_27": {},
+                    "slot_30": {},
+                    "slot_33": {},
+                    "slot_35": {},
+                    "slot_38": {},
+                    "slot_5": {},
+                    "slot_8": {}
+                },
+                "POWER": {
+                    "slot_16": {
+                        "buff": {
+                            "laborSpeed": 0
+                        }
+                    },
+                    "slot_26": {
+                        "buff": {
+                            "laborSpeed": 0
+                        }
+                    }
+                },
+                "TRADING": {
+                    "slot_24": {
+                        "buff": {
+                            "speed": 0.6,
+                            "limit": 2,
+                            "apCost": {
+                                "all": 0,
+                                "single": {},
+                                "self": {}
+                            },
+                            "rate": {}
+                        },
+                        "state": 1,
+                        "lastUpdateTime": 1581660803,
+                        "strategy": "O_GOLD",
+                        "stockLimit": 12,
+                        "apCost": -85,
+                        "stock": [],
+                        "next": {
+                            "order": 694,
+                            "processPoint": 11952.5,
+                            "maxPoint": 12600,
+                            "speed": 1.6
+                        },
+                        "completeWorkTime": 1581668273
+                    }
+                },
+                "DORMITORY": {
+                    "slot_20": {
+                        "buff": {
+                            "apCost": {
+                                "all": 0,
+                                "single": {
+                                    "target": null,
+                                    "value": 0
+                                },
+                                "self": {
+                                    "32": 70
+                                }
+                            }
+                        },
+                        "comfort": 3000,
+                        "diySolution": {
+                            "wallPaper": "furni_pizza_wallpaper_01",
+                            "floor": "furni_pizza_floor_01",
+                            "carpet": [],
+                            "other": [
+                                {
+                                    "id": "furni_pizza_cashierDesk_01",
+                                    "coordinate": {
+                                        "x": 0,
+                                        "y": 4
+                                    }
+                                },
+                                {
+                                    "id": "furni_pizza_brazier_01",
+                                    "coordinate": {
+                                        "x": 6,
+                                        "y": 0
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                "CORRIDOR": {
+                    "slot_10": {},
+                    "slot_12": {},
+                    "slot_17": {},
+                    "slot_19": {},
+                    "slot_2": {},
+                    "slot_22": {},
+                    "slot_29": {},
+                    "slot_31": {}
+                }
+            },
+            "assist": [
+                31,
+                58,
+                57,
+                49,
+                -1
+            ]
+        },
+        "dexNav": {
+            "team": {
+                "-1": {
+                    "1": 1,
+                    "10": 1,
+                    "11": 1,
+                    "15": 1,
+                    "16": 1,
+                    "17": 1,
+                    "19": 1,
+                    "21": 1,
+                    "23": 1,
+                    "28": 1,
+                    "33": 1,
+                    "34": 1,
+                    "36": 1,
+                    "37": 1,
+                    "38": 1,
+                    "41": 1,
+                    "42": 1,
+                    "44": 1,
+                    "46": 1,
+                    "47": 1,
+                    "5": 1,
+                    "50": 1,
+                    "51": 1,
+                    "53": 1,
+                    "57": 1,
+                    "58": 1,
+                    "59": 1,
+                    "61": 1,
+                    "62": 1,
+                    "9": 1
+                },
+                "1": {
+                    "2": 1,
+                    "22": 1,
+                    "3": 1,
+                    "4": 1
+                },
+                "11": {
+                    "29": 1,
+                    "56": 1
+                },
+                "12": {
+                    "18": 1
+                }
+            },
+            "enemy": {
+                "stage": {
+                    "camp_02": [
+                        "enemy_1027_mob",
+                        "enemy_1027_mob_2"
+                    ]
+                }
+            }
+        },
+        "dungeon": {
+            "stages": {
+                "a001_01": {
+                    "stageId": "a001_01",
+                    "completeTimes": 1,
+                    "startTimes": 1,
+                    "practiceTimes": 0,
+                    "state": 3,
+                    "hasBattleReplay": 1,
+                    "noCostCnt": 1
+                }
+            }
+        },
+        "troop": {
+            "curCharInstId": 63,
+            "curSquadCount": 4,
+            "squads": {
+                "0": {
+                    "squadId": "0",
+                    "name": "pepega",
+                    "slots": [
+                        {
+                            "charInstId": 29,
+                            "skillIndex": 0
+                        },
+                        {
+                            "charInstId": 49,
+                            "skillIndex": 1
+                        },
+                        {
+                            "charInstId": 46,
+                            "skillIndex": 1
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

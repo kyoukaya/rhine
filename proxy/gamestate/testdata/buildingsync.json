@@ -1,0 +1,88 @@
+{
+    "ts": 1581663911,
+    "playerDataDelta": {
+        "modified": {
+            "building": {
+                "rooms": {
+                    "ELEVATOR": {
+                        "slot_9": {}
+                    },
+                    "POWER": {
+                        "slot_27": {
+                            "buff": {
+                                "laborSpeed": 0
+                            }
+                        }
+                    },
+                    "TRADING": {
+                        "slot_24": {
+                            "buff": {
+                                "apCost": {
+                                    "all": 99,
+                                    "single": {},
+                                    "self": {}
+                                }
+                            }
+                        }
+                    },
+                    "DORMITORY": {
+                        "slot_20": {
+                            "buff": {
+                                "apCost": {
+                                    "self": {
+                                        "32": 99
+                                    }
+                                }
+                            },
+                            "comfort": 3000,
+                            "diySolution": {
+                                "other": [
+                                    {
+                                        "id": "furni_pizza_cashierDesk_01",
+                                        "coordinate": {
+                                            "x": 0,
+                                            "y": 4
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "CORRIDOR": {
+                        "slot_10": {},
+                        "slot_12": {},
+                        "slot_17": {},
+                        "slot_19": {},
+                        "slot_2": {},
+                        "slot_22": {},
+                        "slot_29": {},
+                        "slot_31": {}
+                    }
+                }
+            },
+            "dexNav": {
+                "team": {
+                    "-2": {
+                        "69": 69
+                    }
+                },
+                "enemy": {
+                    "stage": {
+                        "camp_02": [
+                            "enemy_1027_mob",
+                            "enemy_1027_mob_2"
+                        ]
+                    }
+                }
+            },
+            "troop": {
+                "squads": {
+                    "0": {
+                        "slots": []
+                    }
+                }
+            }
+        },
+        "deleted": {}
+    }
+}
