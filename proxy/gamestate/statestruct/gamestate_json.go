@@ -149,7 +149,7 @@ type HireInfo struct {
 	RefreshCount     int64          `json:"refreshCount"`
 	LastUpdateTime   int64          `json:"lastUpdateTime"`
 	ProcessPoint     int64          `json:"processPoint"`
-	Speed            int64          `json:"speed"`
+	Speed            float64        `json:"speed"`
 	CompleteWorkTime int64          `json:"completeWorkTime"`
 }
 
@@ -180,7 +180,7 @@ type MeetingInfo struct {
 		Weight Weight  `json:"weight"`
 	} `json:"buff"`
 	State        int64   `json:"state"`
-	Speed        int64   `json:"speed"`
+	Speed        float64 `json:"speed"`
 	ProcessPoint int64   `json:"processPoint"`
 	OwnStock     []Stock `json:"ownStock"`
 	ReceiveStock []Stock `json:"receiveStock"`
@@ -237,7 +237,7 @@ type CharElement struct {
 
 type PowerInfo struct {
 	Buff struct {
-		LaborSpeed int64 `json:"laborSpeed"`
+		LaborSpeed float64 `json:"laborSpeed"`
 	} `json:"buff"`
 }
 
