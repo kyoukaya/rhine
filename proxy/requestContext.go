@@ -19,7 +19,7 @@ type RequestContext struct {
 	StartT time.Time
 	// Contains the dispatch object for the corresponding user if this is
 	// a response to a game request.
-	Dispatch *Dispatch
+	dispatch *dispatch
 }
 
 // GetRequestContext returns the dispatch context for a goproxy.ProxyCtx, will panic if

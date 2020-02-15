@@ -24,6 +24,33 @@ type GameState struct {
 	loaded     bool
 }
 
+// New provides a newly instantiated GameState struct and a callback for the
+// proxy to call on every game packet.
+func New(log rhLog.Logger) (*GameState, func(string, []byte, *goproxy.ProxyCtx)) {
+	gs := GameState{log: log}
+	gs.stateMutex.Lock()
+	return &gs, gs.handle
+}
+
+// StateSync blocks until the gamestate is usable. The consistency provided by
+// this function isn't strict, but considering the time between packets, and
+// that that the gamestate is guaranteed to be at least as new as the seqnum
+// of the packet context that StateSync was called on and any transitional
+// states up to the seqnum of the latest packet context.
+func (mod *GameState) StateSync() {
+	mod.stateMutex.Lock()
+	// No critical section necessary as we're just waiting for the parseDataDelta
+	// routine to release the lock on the state so we know that any caller
+	mod.stateMutex.Unlock() //nolint:staticcheck
+}
+
+// GetStateRef will block until the module finishes parsing S/account/syncData.
+func (mod *GameState) GetStateRef() *statestruct.User {
+	mod.stateMutex.Lock()
+	defer mod.stateMutex.Unlock()
+	return mod.state
+}
+
 func (mod *GameState) parseDataDelta(data []byte, op string) {
 	defer mod.stateMutex.Unlock()
 	res := gjson.GetBytes(data, "playerDataDelta.modified")
@@ -44,12 +71,6 @@ func (mod *GameState) parseDataDelta(data []byte, op string) {
 	// so that other routines can register to be notified if a certain object
 	// or field changes, but that might involve messing with mergo or
 	// traversing stuff.
-}
-
-// StateBarrier blocks until the gamestate is usable.
-func (mod *GameState) StateBarrier() {
-	mod.stateMutex.Lock()
-	mod.stateMutex.Unlock()
 }
 
 func (mod *GameState) handle(op string, data []byte, pktCtx *goproxy.ProxyCtx) {
@@ -74,21 +95,6 @@ func (mod *GameState) handleSyncData(data []byte) []byte {
 	}
 	mod.loaded = true
 	return data
-}
-
-// GetStateRef will block until the module finishes parsing S/account/syncData.
-func (mod *GameState) GetStateRef() *statestruct.User {
-	mod.stateMutex.Lock()
-	defer mod.stateMutex.Unlock()
-	return mod.state
-}
-
-// New provides a newly instantiated GameState struct and a callback for the
-// proxy to call on every game packet.
-func New(log rhLog.Logger) (*GameState, func(string, []byte, *goproxy.ProxyCtx)) {
-	gs := GameState{log: log}
-	gs.stateMutex.Lock()
-	return &gs, gs.handle
 }
 
 func unmarshalSyncData(data []byte) (syncData, error) {

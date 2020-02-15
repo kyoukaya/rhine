@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"time"
 
-	rhLog "github.com/kyoukaya/rhine/log"
 	"github.com/kyoukaya/rhine/proxy"
 	"github.com/kyoukaya/rhine/utils"
 
@@ -24,8 +23,7 @@ const modName = "Packet Logger"
 type rawPacketLoggerState struct {
 	fileLogger *log.Logger
 	buffer     *bufio.Writer
-	d          *proxy.Dispatch
-	rhLog.Logger
+	*proxy.RhineModule
 }
 
 func (state *rawPacketLoggerState) handle(op string, data []byte, pktCtx *goproxy.ProxyCtx) []byte {
@@ -34,27 +32,26 @@ func (state *rawPacketLoggerState) handle(op string, data []byte, pktCtx *goprox
 }
 
 func (state *rawPacketLoggerState) Shutdown(bool) {
-	state.Printf("Shutting down packetLogger for %d\n", state.d.UID)
+	state.Printf("Shutting down packetLogger for %d\n", state.UID)
 	state.buffer.Flush()
+}
+
+func initFunc(mod *proxy.RhineModule) {
+	dir := fmt.Sprintf("%s/logs/%s/%s_%s/", utils.BinDir, modName, mod.Region, strconv.Itoa(mod.UID))
+	err := os.MkdirAll(dir, 0755)
+	utils.Check(err)
+	now := time.Now()
+	f, err := os.Create(fmt.Sprintf("%s%s.log", dir, now.Format("2006-01-02_15.04.05")))
+	utils.Check(err)
+	buffer := bufio.NewWriter(f)
+	logger := log.New(buffer, "", log.Ltime)
+	state := &rawPacketLoggerState{logger, buffer, mod}
+
+	mod.OnShutdown(state.Shutdown)
+	mod.Hook("*", 0, state.handle)
 }
 
 // Register hooks with dispatch
 func init() {
-	initFunc := func(d *proxy.Dispatch) ([]*proxy.PacketHook, proxy.ShutdownCb) {
-		dir := fmt.Sprintf("%s/logs/%s/%s_%s/", utils.BinDir, modName, d.Region, strconv.Itoa(d.UID))
-		err := os.MkdirAll(dir, 0755)
-		utils.Check(err)
-		now := time.Now()
-		f, err := os.Create(fmt.Sprintf("%s%s.log", dir, now.Format("2006-01-02_15.04.05")))
-		utils.Check(err)
-		buffer := bufio.NewWriter(f)
-		logger := log.New(buffer, "", log.Ltime)
-
-		mod := &rawPacketLoggerState{logger, buffer, d, d.Logger}
-		hooks := []*proxy.PacketHook{
-			proxy.NewPacketHook(modName, "*", 0, mod.handle),
-		}
-		return hooks, mod.Shutdown
-	}
-	proxy.RegisterMod(modName, initFunc)
+	proxy.RegisterInitFunc(modName, initFunc)
 }

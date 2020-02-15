@@ -43,20 +43,20 @@ func (proxy *Proxy) HandleReq(req *http.Request, ctx *goproxy.ProxyCtx) (*http.R
 	op := "C/" + strings.Trim(req.URL.Path, "/")
 	uid := req.Header.Get("uid")
 	region := regionMap[req.URL.Hostname()[13:]]
-	var d *Dispatch
+	var d *dispatch
 	if uid == "" {
 		if op != "C/account/login" {
 			return req, nil
 		}
 		uid = gjson.GetBytes(body, "uid").String()
-		d = proxy.AddUser(uid, region)
+		d = proxy.addUser(uid, region)
 	} else {
-		d = proxy.GetUser(uid, region)
+		d = proxy.getUser(uid, region)
 	}
 	if d == nil {
 		return req, nil
 	}
-	reqCtx.Dispatch = d
+	reqCtx.dispatch = d
 	reqCtx.RequestData = body
 	reqCtx.RequestOp = op
 	req, resp := d.dispatch(op, body, ctx)
@@ -78,10 +78,10 @@ func (proxy *Proxy) HandleResp(resp *http.Response, ctx *goproxy.ProxyCtx) *http
 	utils.Check(err)
 	resp.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 	// Game traffic
-	if reqCtx.Dispatch != nil {
+	if reqCtx.dispatch != nil {
 		recvT := time.Now()
 		op := "S/" + strings.Trim(ctx.Req.URL.Path, "/")
-		_, resp := reqCtx.Dispatch.dispatch(op, body, ctx)
+		_, resp := reqCtx.dispatch.dispatch(op, body, ctx)
 		proxy.Verbosef("<<<< %s (%d,%d)\n", op, recvT.Sub(reqCtx.StartT).Milliseconds(), time.Since(recvT).Milliseconds())
 		return resp
 	}

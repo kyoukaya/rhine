@@ -1,12 +1,23 @@
 package proxy
 
-type rhineModule struct {
-	name     string
-	initFunc ModuleInitFunc
+type RhineModule struct {
+	Region string
+	UID    int
+
+	name string
+	*dispatch
+	shutdownCB  ShutdownCb
+	hooks       []*PacketHook
+	initialized bool
+}
+
+type initFunc struct {
+	name string
+	fun  ModuleInitFunc
 }
 
 var (
-	modules []*rhineModule
+	modules []initFunc
 )
 
 // ShutdownCb will be called when the proxy is shutting down or when a user reconnects.
@@ -14,13 +25,29 @@ type ShutdownCb func(shuttingDown bool)
 
 // ModuleInitFunc will be executed when a user authenticates with the server to get
 // initialized packethooks and the shutdown callback for a module.
-type ModuleInitFunc func(d *Dispatch) ([]*PacketHook, ShutdownCb)
+type ModuleInitFunc func(*RhineModule)
 
-// RegisterMod adds a rhineModule that will be have its hook and shutdown generators run
+// RegisterInitFunc adds a rhineModule that will be have its hook and shutdown generators run
 // when a user authenticates with the game servers.
-func RegisterMod(name string, initFunc ModuleInitFunc) {
-	modules = append(modules, &rhineModule{
-		name:     name,
-		initFunc: initFunc,
-	})
+func RegisterInitFunc(name string, fun ModuleInitFunc) {
+	modules = append(modules, initFunc{name: name, fun: fun})
+}
+
+type Hooker interface {
+	Unhook()
+}
+
+func (m *RhineModule) Hook(target string, priority int, handler PacketHandler) Hooker {
+	hook := &PacketHook{target, priority, handler, m}
+	if m.initialized {
+		m.Warnf("Failed to add hook %#v, module already initialized.", hook)
+		return nil
+	}
+	m.hooks = append(m.hooks, hook)
+	m.dispatch.insertHook(hook)
+	return hook
+}
+
+func (m *RhineModule) OnShutdown(cb ShutdownCb) {
+	m.shutdownCB = cb
 }

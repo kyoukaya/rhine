@@ -7,32 +7,35 @@ import (
 // PacketHook contains information about the hook and allows for execution of the underlying
 // Handle and Shutdown methods in the PacketHandler.
 type PacketHook struct {
-	name     string
 	target   string
 	priority int
 	handler  PacketHandler
+	mod      *RhineModule
 }
 
-// Handle calls the Handle method of the underlying PacketHandler.
-func (hook *PacketHook) Handle(op string, data []byte, pktCtx *goproxy.ProxyCtx) []byte {
+// handle calls the handle method of the underlying PacketHandler.
+func (hook *PacketHook) handle(op string, data []byte, pktCtx *goproxy.ProxyCtx) []byte {
 	return hook.handler(op, data, pktCtx)
+}
+
+func (hook *PacketHook) Unhook() {
+	if hook == nil {
+		// Fail silently
+		return
+	}
+	hook.mod.dispatch.removeHook(hook)
 }
 
 // PacketHandler represents handler functions exposed by a module.
 type PacketHandler func(op string, data []byte, pktCtx *goproxy.ProxyCtx) []byte
 
-// NewPacketHook returns an initialized PacketHook struct.
-func NewPacketHook(name, target string, priority int, handler PacketHandler) *PacketHook {
-	return &PacketHook{name, target, priority, handler}
-}
-
-func insertHook(hookMap map[string][]*PacketHook, hook *PacketHook) error {
+func (d *dispatch) insertHook(hook *PacketHook) {
 	var hookSlice []*PacketHook
-	hookSlice, ok := hookMap[hook.target]
+
+	hookSlice, ok := d.hooks[hook.target]
 	if !ok {
 		hookSlice = make([]*PacketHook, 0)
 	}
 	hookSlice = append(hookSlice, hook)
-	hookMap[hook.target] = hookSlice
-	return nil
+	d.hooks[hook.target] = hookSlice
 }

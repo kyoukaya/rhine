@@ -12,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	rhLog "github.com/kyoukaya/rhine/log"
 	"github.com/kyoukaya/rhine/proxy"
 	"github.com/kyoukaya/rhine/utils"
 	"github.com/kyoukaya/rhine/utils/gamedata"
@@ -26,16 +25,16 @@ import (
 const modName = "Drop Logger"
 
 type modState struct {
-	d           *proxy.Dispatch
 	fileLogger  *log.Logger
+	mutex       sync.Mutex
 	currStage   string
 	stageStartT *time.Time
 	isPractice  bool
-	gd          *gamedata.GameData
-	itemTable   *itemtable.ItemTable
-	stageTable  *stagetable.StageTable
-	rhLog.Logger
-	mutex sync.Mutex
+
+	*proxy.RhineModule
+	gd         *gamedata.GameData
+	itemTable  *itemtable.ItemTable
+	stageTable *stagetable.StageTable
 }
 
 type logEntry struct {
@@ -122,28 +121,25 @@ func (mod *modState) battleStartHandler(op string, data []byte, ctx *goproxy.Pro
 	return data
 }
 
-func initFunc(d *proxy.Dispatch) ([]*proxy.PacketHook, proxy.ShutdownCb) {
+func initFunc(mod *proxy.RhineModule) {
 	dir := fmt.Sprintf("%s/logs/%s/", utils.BinDir, modName)
 	err := os.MkdirAll(dir, 0755)
 	utils.Check(err)
-	f, err := os.OpenFile(fmt.Sprintf("%s%s_%s.log", dir, d.Region, strconv.Itoa(d.UID)),
+	f, err := os.OpenFile(fmt.Sprintf("%s%s_%s.log", dir, mod.Region, strconv.Itoa(mod.UID)),
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 	utils.Check(err)
 	fileLogger := log.New(f, "", 0)
-	gd, err := gamedata.New(d.Region, d.Logger)
+	gd, err := gamedata.New(mod.Region, mod.Logger)
 	utils.Check(err)
-	mod := modState{
-		d:          d,
-		fileLogger: fileLogger,
-		gd:         gd,
-		Logger:     d.Logger,
+	state := modState{
+		fileLogger:  fileLogger,
+		gd:          gd,
+		RhineModule: mod,
 	}
-	return []*proxy.PacketHook{
-		proxy.NewPacketHook(modName, "S/quest/battleFinish", 0, mod.battleFinishHandler),
-		proxy.NewPacketHook(modName, "S/quest/battleStart", 0, mod.battleStartHandler),
-	}, func(bool) {}
+	mod.Hook("S/quest/battleFinish", 0, state.battleFinishHandler)
+	mod.Hook("S/quest/battleStart", 0, state.battleStartHandler)
 }
 
 func init() {
-	proxy.RegisterMod(modName, initFunc)
+	proxy.RegisterInitFunc(modName, initFunc)
 }

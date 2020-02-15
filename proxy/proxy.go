@@ -45,9 +45,9 @@ type Proxy struct {
 	server     *goproxy.ProxyHttpServer
 	hostFilter *regexp.Regexp
 	options    *Options
-	// users contains a mapping of a user's UID and region in string form to a
-	// Dispatch struct containing the context pertaining to the user.
-	users map[string]*Dispatch
+	// dispatches contains a mapping of a user's UID and region in string form
+	// to the user's Dispatch.
+	dispatches map[string]*dispatch
 	log.Logger
 }
 
@@ -94,7 +94,7 @@ func NewProxy(options *Options) *Proxy {
 		server:     server,
 		options:    options,
 		Logger:     logger,
-		users:      make(map[string]*Dispatch),
+		dispatches: make(map[string]*dispatch),
 		hostFilter: proxyFilter,
 	}
 	server.OnRequest().DoFunc(proxy.HandleReq)
@@ -156,32 +156,36 @@ func (p *Proxy) Start() {
 
 // Shutdown calls Shutdown on all modules for all users.
 func (p *Proxy) Shutdown() {
-	for _, user := range p.users {
-		for _, cb := range user.shutdownCBs {
-			cb(true)
+	for _, dispatch := range p.dispatches {
+		for _, mod := range dispatch.modules {
+			if mod.shutdownCB != nil {
+				mod.shutdownCB(true)
+			}
 		}
 	}
 }
 
-// GetUser returns a Dispatch for the specified UID
-func (p *Proxy) GetUser(UID, region string) *Dispatch {
+// getUser returns a Dispatch for the specified UID
+func (p *Proxy) getUser(UID, region string) *dispatch {
 	rUID := region + "_" + UID
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
-	return p.users[rUID]
+	return p.dispatches[rUID]
 }
 
-// AddUser records a user's information indexed by their UID, if a record belonging to
+// addUser records a user's information indexed by their UID, if a record belonging to
 // the specified UID already exists, its hooks will be shutdown and the record will be overwritten.
-func (p *Proxy) AddUser(UID, region string) *Dispatch {
+func (p *Proxy) addUser(UID, region string) *dispatch {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 	rUID := region + "_" + UID
 
-	if user, exists := p.users[rUID]; exists {
+	if dispatch, exists := p.dispatches[rUID]; exists {
 		p.Printf("%s reconnecting. Shutting down mods.", rUID)
-		for _, cb := range user.shutdownCBs {
-			cb(false)
+		for _, module := range dispatch.modules {
+			if module.shutdownCB != nil {
+				module.shutdownCB(true)
+			}
 		}
 	} else {
 		p.Printf("User %s logged in", rUID)
@@ -189,14 +193,14 @@ func (p *Proxy) AddUser(UID, region string) *Dispatch {
 
 	UIDint, err := strconv.Atoi(UID)
 	utils.Check(err)
-	d := &Dispatch{
+	d := &dispatch{
 		mutex:  &sync.Mutex{},
-		UID:    UIDint,
-		Region: region,
-		Hooks:  make(map[string][]*PacketHook),
+		uid:    UIDint,
+		region: region,
+		hooks:  make(map[string][]*PacketHook),
 		Logger: p.Logger,
 	}
 	d.initMods(modules)
-	p.users[rUID] = d
+	p.dispatches[rUID] = d
 	return d
 }
