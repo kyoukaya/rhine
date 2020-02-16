@@ -69,9 +69,10 @@ func (d *dispatch) initMods(mods []initFunc) {
 	// Load user modules
 	for _, modInit := range mods {
 		newMod := &RhineModule{
-			dispatch: d,
-			Region:   d.region,
-			UID:      d.uid,
+			Region:    d.region,
+			UID:       d.uid,
+			GameState: gs,
+			dispatch:  d,
 		}
 		modInit.fun(newMod)
 		d.modules = append(d.modules, newMod)

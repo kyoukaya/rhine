@@ -1,8 +1,11 @@
 package proxy
 
+import "github.com/kyoukaya/rhine/proxy/gamestate"
+
 type RhineModule struct {
-	Region string
-	UID    int
+	Region    string
+	UID       int
+	GameState *gamestate.GameState
 
 	name string
 	*dispatch
