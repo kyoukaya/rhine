@@ -1,17 +1,20 @@
 package proxy
 
-import "github.com/kyoukaya/rhine/proxy/gamestate"
+import (
+	"github.com/kyoukaya/rhine/proxy/gamestate"
+	"github.com/kyoukaya/rhine/proxy/gamestate/statestruct"
+)
 
 type RhineModule struct {
-	Region    string
-	UID       int
-	GameState *gamestate.GameState
+	Region string
+	UID    int
 
 	name string
 	*dispatch
 	shutdownCB  ShutdownCb
 	hooks       []*PacketHook
 	initialized bool
+	gameState   *gamestate.GameState
 }
 
 type initFunc struct {
@@ -51,6 +54,19 @@ func (m *RhineModule) Hook(target string, priority int, handler PacketHandler) H
 	return hook
 }
 
+func (m *RhineModule) StateHook(path string, listener chan string) *gamestate.GameStateHook {
+	return m.gameState.Hook(path, m.name, listener)
+}
+
 func (m *RhineModule) OnShutdown(cb ShutdownCb) {
 	m.shutdownCB = cb
+}
+
+// GetGameState will block until the gamestate module finishes parsing S/account/syncData.
+func (m *RhineModule) GetGameState() *statestruct.User {
+	if !m.gameState.IsLoaded() {
+		m.Warnf("%s: failed to get gamestate as the gamestate module is not ready", m.name)
+		return nil
+	}
+	return m.dispatch.state.GetStateRef()
 }

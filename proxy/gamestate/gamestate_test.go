@@ -50,3 +50,52 @@ func TestGameStateTraverse(t *testing.T) {
 	check(t, err)
 	f.Close()
 }
+
+type logShim struct{ t *testing.T }
+
+func (l logShim) Flush()                              {}
+func (l logShim) Println(i ...interface{})            { l.t.Log(i...) }
+func (l logShim) Printf(s string, i ...interface{})   { l.t.Logf(s, i...) }
+func (l logShim) Verboseln(i ...interface{})          { l.t.Log(i...) }
+func (l logShim) Verbosef(s string, i ...interface{}) { l.t.Logf(s, i...) }
+func (l logShim) Warnln(i ...interface{})             { l.t.Error(i...) }
+func (l logShim) Warnf(s string, i ...interface{})    { l.t.Errorf(s, i...) }
+
+func TestModificationHooks(t *testing.T) {
+	const testPath = "dexNav.enemy.stage.camp_02"
+	data := openAndRead(t, "testdata/buildingsync.json")
+	b := []byte(gjson.GetBytes(data, "playerDataDelta.modified").Raw)
+	testChan := make(chan string, 1)
+	mod, _ := New(logShim{t})
+	mod.stateMutex.Unlock()
+	hook := mod.Hook(testPath, "test", testChan)
+	// WalkAndNotify should be called within the critical section
+	mod.stateMutex.Lock()
+	err := mod.WalkAndNotify(b)
+	mod.stateMutex.Unlock()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var path string
+	select {
+	case path = <-testChan:
+	default:
+		t.Fatal()
+	}
+	if path != testPath {
+		t.Fatal()
+	}
+	hook.Unhook()
+	// Shouldn't be able to get path from testChan anymore after unhooking
+	mod.stateMutex.Lock()
+	err = mod.WalkAndNotify(b)
+	mod.stateMutex.Unlock()
+	if err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-testChan:
+		t.Fatal()
+	default:
+	}
+}

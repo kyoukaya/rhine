@@ -15,6 +15,8 @@ import (
 	"github.com/elazarl/goproxy"
 )
 
+const hookQueueMax = 100
+
 // GameState provides a handle in which users can obtain a reference to the
 // gamestate struct.
 type GameState struct {
@@ -22,14 +24,28 @@ type GameState struct {
 	stateMutex sync.Mutex
 	log        rhLog.Logger
 	loaded     bool
+	// Hooks are first added into the hookQueue and then added into the
+	// stateHooks map just before notifying listeners with parseHookQueue.
+	hookQueue  chan *GameStateHook
+	stateHooks map[string][]*GameStateHook
 }
 
 // New provides a newly instantiated GameState struct and a callback for the
 // proxy to call on every game packet.
 func New(log rhLog.Logger) (*GameState, func(string, []byte, *goproxy.ProxyCtx)) {
-	gs := GameState{log: log}
+	gs := GameState{
+		log:        log,
+		stateHooks: make(map[string][]*GameStateHook),
+		hookQueue:  make(chan *GameStateHook, hookQueueMax),
+	}
 	gs.stateMutex.Lock()
 	return &gs, gs.handle
+}
+
+// IsLoaded checks if the initial sync packet has already been parsed and the
+// gamestate instance is ready for use.
+func (mod *GameState) IsLoaded() bool {
+	return mod.loaded
 }
 
 // StateSync blocks until the gamestate is usable. The consistency provided by
@@ -57,7 +73,9 @@ func (mod *GameState) parseDataDelta(data []byte, op string) {
 	if !res.Exists() {
 		return
 	}
-	user, err := unmarshalUserData([]byte(res.String()))
+	// Could do an unsafe string cast here for performance
+	b := []byte(res.String())
+	user, err := unmarshalUserData(b)
 	if err != nil {
 		mod.log.Warnf("Failed to unmarshal %s: %s", op, err.Error())
 		return
@@ -66,11 +84,12 @@ func (mod *GameState) parseDataDelta(data []byte, op string) {
 	if err != nil {
 		mod.log.Warnf("Failed to merge %s: %s", op, err.Error())
 	}
-	// Call hooks?
-	// Ideally we want a system to allow granular event-based notifications
-	// so that other routines can register to be notified if a certain object
-	// or field changes, but that might involve messing with mergo or
-	// traversing stuff.
+	// Notify state listeners
+	err = mod.WalkAndNotify(b)
+	if err != nil {
+		mod.log.Warnf("Error occurred while notifying game state listeners: %s",
+			err.Error())
+	}
 }
 
 func (mod *GameState) handle(op string, data []byte, pktCtx *goproxy.ProxyCtx) {

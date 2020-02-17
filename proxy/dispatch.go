@@ -67,17 +67,18 @@ func (d *dispatch) initMods(mods []initFunc) {
 	d.state = gs
 	d.coreHandlers = append(d.coreHandlers, gsHandler)
 	// Load user modules
-	for _, modInit := range mods {
+	for _, mod := range mods {
 		newMod := &RhineModule{
+			name:      mod.name,
 			Region:    d.region,
 			UID:       d.uid,
-			GameState: gs,
+			gameState: gs,
 			dispatch:  d,
 		}
-		modInit.fun(newMod)
+		mod.fun(newMod)
 		d.modules = append(d.modules, newMod)
 		newMod.initialized = true
-		d.Printf("%s loaded.", modInit.name)
+		d.Printf("%s loaded.", mod.name)
 	}
 	d.sortHooks()
 	d.Verbosef("Mods loaded in %dms", time.Since(startT).Milliseconds())
