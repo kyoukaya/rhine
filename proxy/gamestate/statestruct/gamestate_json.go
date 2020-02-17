@@ -148,7 +148,7 @@ type HireInfo struct {
 	State            int64          `json:"state"`
 	RefreshCount     int64          `json:"refreshCount"`
 	LastUpdateTime   int64          `json:"lastUpdateTime"`
-	ProcessPoint     int64          `json:"processPoint"`
+	ProcessPoint     float64        `json:"processPoint"`
 	Speed            float64        `json:"speed"`
 	CompleteWorkTime int64          `json:"completeWorkTime"`
 }
@@ -181,7 +181,7 @@ type MeetingInfo struct {
 	} `json:"buff"`
 	State        int64   `json:"state"`
 	Speed        float64 `json:"speed"`
-	ProcessPoint int64   `json:"processPoint"`
+	ProcessPoint float64 `json:"processPoint"`
 	OwnStock     []Stock `json:"ownStock"`
 	ReceiveStock []Stock `json:"receiveStock"`
 	Board        struct {
@@ -295,11 +295,11 @@ type WorkshopInfo struct {
 }
 
 type Labor struct {
-	BuffSpeed      int64 `json:"buffSpeed"`
-	ProcessPoint   int64 `json:"processPoint"`
-	Value          int64 `json:"value"`
-	LastUpdateTime int64 `json:"lastUpdateTime"`
-	MaxValue       int64 `json:"maxValue"`
+	BuffSpeed      float64 `json:"buffSpeed"`
+	ProcessPoint   float64 `json:"processPoint"`
+	Value          int64   `json:"value"`
+	LastUpdateTime int64   `json:"lastUpdateTime"`
+	MaxValue       int64   `json:"maxValue"`
 }
 
 type UserCheckIn struct {
