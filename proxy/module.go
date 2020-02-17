@@ -54,8 +54,8 @@ func (m *RhineModule) Hook(target string, priority int, handler PacketHandler) H
 	return hook
 }
 
-func (m *RhineModule) StateHook(path string, listener chan string) *gamestate.GameStateHook {
-	return m.gameState.Hook(path, m.name, listener)
+func (m *RhineModule) StateHook(path string, listener chan gamestate.StateEvent, wantPayload bool) *gamestate.GameStateHook {
+	return m.gameState.Hook(path, m.name, listener, wantPayload)
 }
 
 func (m *RhineModule) OnShutdown(cb ShutdownCb) {

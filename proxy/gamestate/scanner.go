@@ -18,6 +18,8 @@ import (
 	"errors"
 	"strconv"
 	"sync"
+
+	"github.com/kyoukaya/go-lookup"
 )
 
 const maxPathDepth = 64
@@ -62,14 +64,32 @@ func (mod *GameState) WalkAndNotify(data []byte) error {
 				return MaxPathError
 			}
 			path[depth-1] = data[lastLiteralPos+1 : i-1]
+
 			curPath := string(bytes.Join(path[:depth], []byte(".")))
+			evt := StateEvent{
+				Path: curPath,
+			}
+			var payload interface{}
 			for _, hook := range mod.stateHooks[curPath] {
+				if hook.wantPayload {
+					if payload != nil {
+						evt.Payload = payload
+					} else {
+						val, err := lookup.LookupString(mod.state, curPath, true)
+						if err != nil {
+							return err
+						}
+						payload = val.Interface()
+						evt.Payload = payload
+					}
+				}
 				select {
-				case hook.listener <- curPath:
+				case hook.listener <- evt:
 				default:
 					mod.log.Warnf("GameState notification for %s:%s dropped",
 						hook.moduleName, hook.path)
 				}
+				evt.Payload = nil
 			}
 		}
 	}

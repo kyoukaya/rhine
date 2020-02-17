@@ -116,10 +116,10 @@ func (mod *GameState) handleSyncData(data []byte) []byte {
 	return data
 }
 
-func unmarshalSyncData(data []byte) (syncData, error) {
+func unmarshalSyncData(data []byte) (*syncData, error) {
 	r := syncData{}
 	err := json.Unmarshal(data, &r)
-	return r, err
+	return &r, err
 }
 
 func unmarshalUserData(data []byte) (*statestruct.User, error) {

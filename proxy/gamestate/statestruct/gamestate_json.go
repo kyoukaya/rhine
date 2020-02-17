@@ -6,7 +6,7 @@ type User struct {
 		AssistCharList  []AssistCharList `json:"assistCharList"`
 		YesterdayReward YesterdayReward  `json:"yesterdayReward"`
 	} `json:"social"`
-	Ticket     interface{} `json:"ticket"`
+	Ticket     EmptyStruct `json:"ticket"`
 	Gacha      *Gacha      `json:"gacha"`
 	OpenServer *struct {
 		CheckIn    OpenServerCheckIn `json:"checkIn"`
@@ -22,8 +22,8 @@ type User struct {
 	Troop     *Troop       `json:"troop"`
 	CheckIn   *UserCheckIn `json:"checkIn"`
 	Activity  *struct {
-		Default     interface{}            `json:"DEFAULT"`
-		MissionOnly map[string]interface{} `json:"MISSION_ONLY"`
+		Default     EmptyStruct            `json:"DEFAULT"`
+		MissionOnly map[string]EmptyStruct `json:"MISSION_ONLY"`
 	} `json:"activity"`
 	Mission          *Mission `json:"mission"`
 	CollectionReward *struct {
@@ -49,7 +49,7 @@ type Building struct {
 		Count int64 `json:"count"`
 		InUse int64 `json:"inUse"`
 	} `json:"furniture"`
-	DiyPresetSolutions interface{} `json:"diyPresetSolutions"`
+	DiyPresetSolutions EmptyStruct `json:"diyPresetSolutions"`
 	Assist             []int64     `json:"assist"`
 }
 
@@ -80,14 +80,16 @@ type Assist struct {
 	Ts  int64 `json:"ts"`
 }
 
+type EmptyStruct struct{}
+
 type Rooms struct {
 	Control     map[string]ControlSlot     `json:"CONTROL"`
-	Elevator    map[string]interface{}     `json:"ELEVATOR"`
+	Elevator    map[string]EmptyStruct     `json:"ELEVATOR"`
 	Power       map[string]PowerInfo       `json:"POWER"`
 	Manufacture map[string]ManufactureInfo `json:"MANUFACTURE"`
 	Trading     map[string]TradingInfo     `json:"TRADING"`
 	Dormitory   map[string]DormInfo        `json:"DORMITORY"`
-	Corridor    map[string]interface{}     `json:"CORRIDOR"`
+	Corridor    map[string]EmptyStruct     `json:"CORRIDOR"`
 	Workshop    map[string]WorkshopInfo    `json:"WORKSHOP"`
 	Meeting     map[string]MeetingInfo     `json:"MEETING"`
 	Hire        map[string]HireInfo        `json:"HIRE"`
@@ -100,7 +102,7 @@ type ControlSlot struct {
 		} `json:"global"`
 		Manufacture SpeedContainer `json:"manufacture"`
 		Trading     SpeedContainer `json:"trading"`
-		ApCost      interface{}    `json:"apCost"`
+		ApCost      EmptyStruct    `json:"apCost"`
 	} `json:"buff"`
 	ApCost int64 `json:"apCost"`
 }
@@ -122,7 +124,7 @@ type DormInfoBuff struct {
 			Target *int64 `json:"target"`
 			Value  int64  `json:"value"`
 		} `json:"single"`
-		Self interface{} `json:"self"`
+		Self EmptyStruct `json:"self"`
 	} `json:"apCost"`
 }
 
@@ -156,7 +158,7 @@ type HireInfo struct {
 type ManufactureInfo struct {
 	Buff struct {
 		ApCost struct {
-			Self interface{} `json:"self"`
+			Self EmptyStruct `json:"self"`
 		} `json:"apCost"`
 		Speed    float64 `json:"speed"`
 		Capacity int64   `json:"capacity"`
@@ -196,7 +198,7 @@ type MeetingInfo struct {
 		Daily  int64 `json:"daily"`
 		Search int64 `json:"search"`
 	} `json:"socialReward"`
-	DailyReward   interface{} `json:"dailyReward"`
+	DailyReward   EmptyStruct `json:"dailyReward"`
 	ExpiredReward int64       `json:"expiredReward"`
 	Received      int64       `json:"received"`
 	InfoShare     struct {
@@ -247,10 +249,10 @@ type TradingInfo struct {
 		Limit  int64   `json:"limit"`
 		ApCost struct {
 			All    int64            `json:"all"`
-			Single interface{}      `json:"single"`
+			Single EmptyStruct      `json:"single"`
 			Self   map[string]int64 `json:"self"`
 		} `json:"apCost"`
-		Rate interface{} `json:"rate"`
+		Rate EmptyStruct `json:"rate"`
 	} `json:"buff"`
 	State          int64          `json:"state"`
 	LastUpdateTime int64          `json:"lastUpdateTime"`
@@ -332,7 +334,7 @@ type Enemy struct {
 }
 
 type Formula struct {
-	Shop        interface{}      `json:"shop"`
+	Shop        EmptyStruct      `json:"shop"`
 	Manufacture map[string]int64 `json:"manufacture"`
 	Workshop    map[string]int64 `json:"workshop"`
 }
@@ -462,7 +464,7 @@ type Shop struct {
 	HS *struct {
 		CurShopID    string      `json:"curShopId"`
 		Info         []Info      `json:"info"`
-		ProgressInfo interface{} `json:"progressInfo"`
+		ProgressInfo EmptyStruct `json:"progressInfo"`
 	} `json:"HS"`
 	ES *struct {
 		CurShopID string `json:"curShopId"`

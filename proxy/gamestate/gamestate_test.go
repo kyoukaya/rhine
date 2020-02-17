@@ -2,10 +2,12 @@ package gamestate
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
-	"os"
 	"testing"
 
+	"github.com/kyoukaya/go-lookup"
+	"github.com/kyoukaya/rhine/proxy/gamestate/statestruct"
 	"github.com/svyotov/mergo"
 	"github.com/tidwall/gjson"
 )
@@ -22,33 +24,32 @@ func openAndRead(t *testing.T, filename string) []byte {
 	return b
 }
 
-// TestGameStateTraverse applies a delta to a base state and saves it to
-// a file on the disk for manual checking.
-func TestGameStateTraverse(t *testing.T) {
+// TestHookWithPayload registers a hook which receives the value that has
+// changed when an event is emitted.
+func TestHookWithPayload(t *testing.T) {
+	mod, _ := New(logShim{t})
+	mod.stateMutex.Unlock()
 	b := openAndRead(t, "testdata/syncdata.json")
 	syncData, err := unmarshalSyncData(b)
-	user := syncData.User
+	mod.state = &syncData.User
 	check(t, err)
-	source, err := json.Marshal(user)
-	check(t, err)
-	f, err := os.Create("source.json")
-	check(t, err)
-	_, err = f.Write(source)
-	check(t, err)
-	f.Close()
 	b = openAndRead(t, "testdata/buildingsync.json")
 	res := gjson.GetBytes(b, "playerDataDelta.modified")
 	newUser, err := unmarshalUserData([]byte(res.Raw))
 	check(t, err)
-	err = mergo.Merge(&user, newUser, mergo.WithOverride)
+	err = mergo.Merge(mod.state, newUser, mergo.WithOverride)
 	check(t, err)
-	merged, err := json.Marshal(user)
+
+	testChan := make(chan StateEvent, 1)
+	go func() {
+		for {
+			evt := <-testChan
+			fmt.Println(evt.Payload.(map[string]statestruct.EmptyStruct))
+		}
+	}()
+	mod.Hook("building.rooms.ELEVATOR", "test", testChan, true)
+	err = mod.WalkAndNotify([]byte(res.Raw))
 	check(t, err)
-	f, err = os.Create("merged.json")
-	check(t, err)
-	_, err = f.Write(merged)
-	check(t, err)
-	f.Close()
 }
 
 type logShim struct{ t *testing.T }
@@ -65,31 +66,28 @@ func TestModificationHooks(t *testing.T) {
 	const testPath = "dexNav.enemy.stage.camp_02"
 	data := openAndRead(t, "testdata/buildingsync.json")
 	b := []byte(gjson.GetBytes(data, "playerDataDelta.modified").Raw)
-	testChan := make(chan string, 1)
+	testChan := make(chan StateEvent, 1)
 	mod, _ := New(logShim{t})
 	mod.stateMutex.Unlock()
-	hook := mod.Hook(testPath, "test", testChan)
-	// WalkAndNotify should be called within the critical section
+	hook := mod.Hook(testPath, "test", testChan, false)
 	mod.stateMutex.Lock()
 	err := mod.WalkAndNotify(b)
 	mod.stateMutex.Unlock()
 	if err != nil {
 		t.Fatal(err)
 	}
-	var path string
+	var evt StateEvent
 	select {
-	case path = <-testChan:
+	case evt = <-testChan:
 	default:
 		t.Fatal()
 	}
-	if path != testPath {
+	if evt.Path != testPath {
 		t.Fatal()
 	}
 	hook.Unhook()
 	// Shouldn't be able to get path from testChan anymore after unhooking
-	mod.stateMutex.Lock()
 	err = mod.WalkAndNotify(b)
-	mod.stateMutex.Unlock()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,4 +96,35 @@ func TestModificationHooks(t *testing.T) {
 		t.Fatal()
 	default:
 	}
+}
+
+// map[string]interface{} did not add new entries in the map. Workaround with
+// map[string]struct{} instead.
+func TestMapInterfaceBug(t *testing.T) {
+	b := openAndRead(t, "testdata/syncdata.json")
+	syncData, err := unmarshalSyncData(b)
+	user := syncData.User
+	check(t, err)
+	data := openAndRead(t, "testdata/buildingsync.json")
+	b = []byte(gjson.GetBytes(data, "playerDataDelta.modified").Raw)
+	newUser, err := unmarshalUserData(b)
+	check(t, err)
+	err = mergo.Merge(&user, newUser, mergo.WithOverride)
+	check(t, err)
+	if _, exists := user.Building.Rooms.Elevator["slot_9"]; !exists {
+		t.Fatal()
+	}
+}
+
+func TestStructAccess(t *testing.T) {
+	b := openAndRead(t, "testdata/syncdata.json")
+	syncData, err := unmarshalSyncData(b)
+	check(t, err)
+	user := syncData.User
+	val, err := lookup.LookupString(user, "Building.Rooms", false)
+	check(t, err)
+	vali := val.Interface()
+	unm, err := json.Marshal(vali)
+	check(t, err)
+	fmt.Printf("%s\n", unm)
 }

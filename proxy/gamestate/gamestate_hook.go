@@ -1,10 +1,16 @@
 package gamestate
 
 type GameStateHook struct {
-	path       string
-	moduleName string
-	listener   chan string
-	gs         *GameState
+	path        string
+	moduleName  string
+	listener    chan StateEvent
+	gs          *GameState
+	wantPayload bool
+}
+
+type StateEvent struct {
+	Path    string
+	Payload interface{}
 }
 
 // Unhook unhooks the hook from the gamestate. Will fail silently if the hook
@@ -39,12 +45,13 @@ func (mod *GameState) parseHookQueue() {
 	}
 }
 
-func (mod *GameState) Hook(path, moduleName string, listener chan string) *GameStateHook {
+func (mod *GameState) Hook(path, moduleName string, listener chan StateEvent, wantPayload bool) *GameStateHook {
 	hook := &GameStateHook{
-		path:       path,
-		moduleName: moduleName,
-		listener:   listener,
-		gs:         mod,
+		path:        path,
+		moduleName:  moduleName,
+		listener:    listener,
+		gs:          mod,
+		wantPayload: wantPayload,
 	}
 	select {
 	case mod.hookQueue <- hook:
