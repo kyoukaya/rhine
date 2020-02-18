@@ -64,9 +64,5 @@ func (m *RhineModule) OnShutdown(cb ShutdownCb) {
 
 // GetGameState will block until the gamestate module finishes parsing S/account/syncData.
 func (m *RhineModule) GetGameState() *statestruct.User {
-	if !m.gameState.IsLoaded() {
-		m.Warnf("%s: failed to get gamestate as the gamestate module is not ready", m.name)
-		return nil
-	}
-	return m.dispatch.state.GetStateRef()
+	return m.gameState.GetStateRef()
 }
