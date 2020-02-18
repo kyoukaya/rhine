@@ -6,6 +6,7 @@ import (
 	"io"
 	stdLog "log"
 	"os"
+	"path"
 	"runtime"
 
 	"github.com/kyoukaya/rhine/utils"
@@ -49,11 +50,13 @@ func New(stdOut, verbose bool, filePath string, flags int) Logger {
 		return logger
 	}
 	if filePath == "" {
-		dir := utils.BinDir + "/logs/"
-		filePath = dir + "proxy.log"
-		err := os.MkdirAll(dir, 0755)
-		utils.Check(err)
+		filePath = utils.BinDir + "/logs/proxy.log"
+	} else if !path.IsAbs(filePath) {
+		filePath = utils.BinDir + "/" + filePath
 	}
+	dir := path.Dir(filePath)
+	err := os.MkdirAll(dir, 0755)
+	utils.Check(err)
 	f, err := os.Create(filePath)
 	utils.Check(err)
 	logger.fileLogger = stdLog.New(f, "", flags)
