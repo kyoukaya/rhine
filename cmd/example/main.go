@@ -3,6 +3,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 
 	_ "github.com/kyoukaya/rhine/mods/droplogger"
@@ -14,15 +15,26 @@ import (
 var env string
 
 func main() {
+	logPath := flag.String("log-path", "logs/proxy.log", "file to output the log to")
+	silent := flag.Bool("silent", false, "don't print anything to stdout")
+	filter := flag.Bool("filter", false, "enable the host filter")
+	verbose := flag.Bool("v", false, "print Rhine verbose messages")
+	verboseGoProxy := flag.Bool("v-goproxy", false, "print verbose goproxy messages")
+	host := flag.String("host", ":8080", "hostname:port")
+	flag.Parse()
+
 	logFlags := log.Llongfile | log.Ltime
 	if env == "release" {
 		logFlags = log.Lshortfile | log.Ltime
 	}
 	options := &proxy.Options{
+		LogPath:          *logPath,
+		LogDisableStdOut: *silent,
+		EnableHostFilter: *filter,
 		LoggerFlags:      logFlags,
-		EnableHostFilter: true, // Enables the host filter
-		HostFilter:       nil,  // Defaults to the built-in host filter
-		Verbose:          true, // Prints additional VERB messages to the console
+		Verbose:          *verbose,
+		VerboseGoProxy:   *verboseGoProxy,
+		Address:          *host,
 	}
 	rhine := proxy.NewProxy(options)
 	rhine.Start()
