@@ -9,13 +9,13 @@ import (
 	"path/filepath"
 )
 
-// BinDir contains the directory in which executable executed is in.
+// BinDir contains the directory in which executable executed is in ending with a forward slash.
 var BinDir = func() string {
 	ex, err := os.Executable()
 	if err != nil {
 		panic(err)
 	}
-	return filepath.Dir(ex)
+	return filepath.Dir(ex) + "/"
 }()
 
 // Check if an error has occurred and panics if it has.

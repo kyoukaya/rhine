@@ -17,6 +17,22 @@ import (
 	"github.com/elazarl/goproxy"
 )
 
+var (
+	// regionMap maps the TLD of the host string to their constant regional
+	// representation: ["GL", "JP"]
+	regionMap = map[string]string{
+		"global": "GL",
+		"jp":     "JP",
+	}
+	// onStartCbs will be called when proxy.Run() is called.
+	onStartCbs []func(log.Logger)
+)
+
+const (
+	certPath = "cert.pem"
+	keyPath  = "key.pem"
+)
+
 // Options optionally changes the behavior of the proxy
 type Options struct {
 	Logger      log.Logger // Defaults to log.Log if not specified
@@ -32,13 +48,6 @@ type Options struct {
 	Address          string         // proxy listen address, defaults to ":8080"
 }
 
-// regionMap maps the TLD of the host string to their constant regional
-// representation: ["GL", "JP"]
-var regionMap = map[string]string{
-	"global": "GL",
-	"jp":     "JP",
-}
-
 // Proxy contains the internal state relevant to the proxy
 type Proxy struct {
 	mutex      *sync.Mutex
@@ -51,22 +60,17 @@ type Proxy struct {
 	log.Logger
 }
 
-// Interface shim for goproxy.Logger
-func logShim(logger log.Logger) func(format string, v ...interface{}) {
-	return func(format string, v ...interface{}) {
-		logger.Printf(format, v...)
-	}
+// RegisterInitFunc adds a rhineModule that will be initialized when a user authenticates
+// with the Arknights server.
+func RegisterInitFunc(name string, fun ModuleInitFunc) {
+	modules = append(modules, initFunc{name: name, fun: fun})
 }
 
-const (
-	certPath = "/cert.pem"
-	keyPath  = "/key.pem"
-)
-
-type printfFunc func(format string, v ...interface{})
-
-func (f printfFunc) Printf(format string, v ...interface{}) {
-	f("[goproxy] "+format, v...)
+// OnStart registers a function to be called back when the proxy is initialized, i.e.,
+// when the proxy server is ready, not when an Arknights user is connected. The
+// Logger interface provided will be the proxy's logger.
+func OnStart(cb func(log.Logger)) {
+	onStartCbs = append(onStartCbs, cb)
 }
 
 // NewProxy returns a new initialized Dispatch
@@ -120,6 +124,19 @@ func NewProxy(options *Options) *Proxy {
 	return proxy
 }
 
+// Interface shim for goproxy.Logger
+func logShim(logger log.Logger) func(format string, v ...interface{}) {
+	return func(format string, v ...interface{}) {
+		logger.Printf(format, v...)
+	}
+}
+
+type printfFunc func(format string, v ...interface{})
+
+func (f printfFunc) Printf(format string, v ...interface{}) {
+	f("[goproxy] "+format, v...)
+}
+
 // HTTPSHandler to allow HTTPS connections to pass through the proxy without being
 // MITM'd.
 func (p *Proxy) httpsHandler(host string, ctx *goproxy.ProxyCtx) (*goproxy.ConnectAction, string) {
@@ -148,6 +165,11 @@ func (p *Proxy) Start() {
 	if len(addrSplit) == 2 {
 		ipstring += ":" + addrSplit[1]
 	}
+
+	for _, cb := range onStartCbs {
+		cb(p.Logger)
+	}
+
 	p.Printf("proxy server listening on %s", ipstring)
 	err := http.ListenAndServe(p.options.Address, p.server)
 	p.Warnln(err)

@@ -18,6 +18,8 @@ func (hook *PacketHook) handle(op string, data []byte, pktCtx *goproxy.ProxyCtx)
 	return hook.handler(op, data, pktCtx)
 }
 
+// Unhook will unhook the receiving PacketHook if it's hooked. Otherwise, it
+// will fail silently.
 func (hook *PacketHook) Unhook() {
 	if hook == nil {
 		// Fail silently
