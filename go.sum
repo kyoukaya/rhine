@@ -10,8 +10,8 @@ github.com/kr/pretty v0.2.0/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfn
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/kyoukaya/go-lookup v0.0.0-20200217151506-2142af44b17d h1:zUhA7L7SD2vOCrXfDeLx2uxjEZdbb8zMp5ADm+Qmgew=
-github.com/kyoukaya/go-lookup v0.0.0-20200217151506-2142af44b17d/go.mod h1:XZ1cDt676YtiaQh0xZrK0Or3AZl/fZcyly7ZdF3ERWQ=
+github.com/kyoukaya/go-lookup v0.0.0-20200222134006-27e96675627f h1:OmmNwMs+JDjpsIfV6B1NvJu4ErtgzGZZ0ZkQLaS/Oks=
+github.com/kyoukaya/go-lookup v0.0.0-20200222134006-27e96675627f/go.mod h1:XZ1cDt676YtiaQh0xZrK0Or3AZl/fZcyly7ZdF3ERWQ=
 github.com/logrusorgru/aurora v0.0.0-20190803045625-94edacc10f9b h1:PMbSa9CgaiQR9NLlUTwKi+7aeLl3GG5JX5ERJxfQ3IE=
 github.com/logrusorgru/aurora v0.0.0-20190803045625-94edacc10f9b/go.mod h1:7rIyQOR62GCctdiQpZ/zOJlFyk6y+94wXzv6RNZgaR4=
 github.com/mattn/go-colorable v0.1.2 h1:/bC9yWikZXAL9uJdulbSfyVNIR3n3trXl+v8+1sx8mU=
