@@ -92,14 +92,14 @@ func (d *dispatch) removeHook(oldHook *PacketHook) {
 		d.Warnf("Tried to remove hook that doesn't exist: %#v", oldHook)
 		return
 	}
-	newHooks := make([]*PacketHook, 0)
+	i := 0
 	for _, hook := range hooks {
 		if hook == oldHook {
-			continue
+			break
 		}
-		newHooks = append(newHooks, hook)
+		i++
 	}
-	d.hooks[oldHook.target] = newHooks
+	d.hooks[oldHook.target] = append(hooks[:i], hooks[i+1:]...)
 }
 
 type byPriority []*PacketHook

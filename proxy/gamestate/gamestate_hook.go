@@ -22,14 +22,14 @@ func (oldHook *GameStateHook) Unhook() {
 	oldHook.gs.stateMutex.Lock()
 	defer oldHook.gs.stateMutex.Unlock()
 	oldHooks := oldHook.gs.stateHooks[oldHook.path]
-	newHooks := make([]*GameStateHook, 0, len(oldHooks))
+	i := 0
 	for _, hook := range oldHooks {
 		if hook == oldHook {
-			continue
+			break
 		}
-		newHooks = append(newHooks, hook)
+		i++
 	}
-	oldHook.gs.stateHooks[oldHook.path] = newHooks
+	oldHook.gs.stateHooks[oldHook.path] = append(oldHooks[:i], oldHooks[i+1:]...)
 }
 
 // Caller is assumed to be holding the mutex.
