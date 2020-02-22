@@ -76,3 +76,10 @@ func (m *RhineModule) OnShutdown(cb ShutdownCb) {
 func (m *RhineModule) GetGameState() *statestruct.User {
 	return m.gameState.GetStateRef()
 }
+
+// StateGet returns the value of the gamestate from the path specified. Path is a
+// period separated string based on the JSON keys, see https://github.com/mcuadros/go-lookup
+// for reference.
+func (m *RhineModule) StateGet(path string) (interface{}, error) {
+	return m.gameState.Get(path)
+}

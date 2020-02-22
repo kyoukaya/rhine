@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"sync"
 
+	"github.com/kyoukaya/go-lookup"
 	rhLog "github.com/kyoukaya/rhine/log"
 	"github.com/kyoukaya/rhine/proxy/gamestate/statestruct"
 	"github.com/svyotov/mergo"
@@ -65,6 +66,17 @@ func (mod *GameState) GetStateRef() *statestruct.User {
 	mod.stateMutex.Lock()
 	defer mod.stateMutex.Unlock()
 	return mod.state
+}
+
+// Get returns the value of the gamestate from the path specified. Path is a
+// period separated string based on the JSON keys, see https://github.com/mcuadros/go-lookup
+// for reference.
+func (mod *GameState) Get(path string) (interface{}, error) {
+	val, err := lookup.LookupString(mod.state, path, true)
+	if err != nil {
+		return nil, err
+	}
+	return val.Interface(), nil
 }
 
 func (mod *GameState) parseDataDelta(data []byte, op string) {
