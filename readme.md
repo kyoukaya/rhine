@@ -40,11 +40,11 @@ func (modState) handle(op string, data []byte, pktCtx *goproxy.ProxyCtx) []byte 
 
 func (modState) cleanUp(shuttingDown bool) {}
 
-func initFunc(d *proxy.Dispatch) ([]*proxy.PacketHook, proxy.ShutdownCb) {
-	mod := modState{}
-	return []*proxy.PacketHook{
-		proxy.NewPacketHook(modName, "S/quest/battleStart", 0, mod.handle),
-	}, mod.cleanUp
+func initFunc(mod *proxy.RhineModule) {
+	state := modState{}
+	
+	mod.OnShutdown(state.cleanUp)
+	mod.Hook("S/quest/battleStart", 0, mod.handle)
 }
 
 func init() {
