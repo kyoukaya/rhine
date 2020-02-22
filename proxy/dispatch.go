@@ -24,6 +24,7 @@ type dispatch struct {
 	hooks        map[string][]*PacketHook
 	coreHandlers []func(string, []byte, *goproxy.ProxyCtx)
 	modules      []*RhineModule
+	intialized   bool
 
 	// Core modules
 	state *gamestate.GameState
@@ -82,6 +83,7 @@ func (d *dispatch) initMods(mods []initFunc) {
 	}
 	d.sortHooks()
 	d.Verbosef("Mods loaded in %dms", time.Since(startT).Milliseconds())
+	d.intialized = true
 }
 
 func (d *dispatch) removeHook(oldHook *PacketHook) {
@@ -109,6 +111,10 @@ func (a byPriority) Less(i, j int) bool { return a[i].priority > a[j].priority }
 // Sort hooks in descending order
 func (d *dispatch) sortHooks() {
 	for _, v := range d.hooks {
-		sort.Sort(byPriority(v))
+		sortHookSl(byPriority(v))
 	}
+}
+
+func sortHookSl(hooks []*PacketHook) {
+	sort.Sort(byPriority(hooks))
 }

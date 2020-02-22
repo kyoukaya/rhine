@@ -33,11 +33,13 @@ type PacketHandler func(op string, data []byte, pktCtx *goproxy.ProxyCtx) []byte
 
 func (d *dispatch) insertHook(hook *PacketHook) {
 	var hookSlice []*PacketHook
-
 	hookSlice, ok := d.hooks[hook.target]
 	if !ok {
 		hookSlice = make([]*PacketHook, 0)
 	}
 	hookSlice = append(hookSlice, hook)
+	if d.intialized {
+		sortHookSl(hookSlice)
+	}
 	d.hooks[hook.target] = hookSlice
 }

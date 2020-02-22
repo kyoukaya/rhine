@@ -45,12 +45,12 @@ type Hooker interface {
 // Hook registers a new packet hook whose PacketHandler will be called back when
 // the specified target packet is received by Rhine. A Hooker is returned, allowing
 // the caller to Unhook the hook to stop receiving callbacks.
+// The current implementation sorts the hooks to maintain priority ordering,
+// while this isn't the most efficient, especially after the initial hooking is done
+// when all the modules are initialized, doing a binary search and bisecting would
+// result in a lot of expensive copying anyway.
 func (m *RhineModule) Hook(target string, priority int, handler PacketHandler) Hooker {
 	hook := &PacketHook{target, priority, handler, m}
-	if m.initialized {
-		m.Warnf("Failed to add hook %#v, module already initialized.", hook)
-		return nil
-	}
 	m.hooks = append(m.hooks, hook)
 	m.dispatch.insertHook(hook)
 	return hook
