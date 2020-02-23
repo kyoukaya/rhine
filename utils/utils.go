@@ -3,7 +3,7 @@
 package utils
 
 import (
-	"log"
+	"fmt"
 	"net"
 	"os"
 	"path/filepath"
@@ -29,7 +29,7 @@ func Check(err error) {
 func GetOutboundIP() string {
 	conn, err := net.Dial("udp", "1.1.1.1:80")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 	defer conn.Close()
 	localAddr := conn.LocalAddr().(*net.UDPAddr)

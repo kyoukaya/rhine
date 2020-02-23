@@ -70,8 +70,10 @@ func (mod *GameState) GetStateRef() *statestruct.User {
 
 // Get returns the value of the gamestate from the path specified. Path is a
 // period separated string based on the JSON keys, see https://github.com/mcuadros/go-lookup
-// for reference.
+// for reference. Blocks until the state is ready.
 func (mod *GameState) Get(path string) (interface{}, error) {
+	mod.stateMutex.Lock()
+	defer mod.stateMutex.Unlock()
 	val, err := lookup.LookupString(mod.state, path, true)
 	if err != nil {
 		return nil, err
