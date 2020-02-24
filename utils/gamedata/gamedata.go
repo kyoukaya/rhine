@@ -1,8 +1,7 @@
 // Package gamedata provides Arknights gamedata lookup datastructures parsed from
 // https://github.com/Kengxxiao/ArknightsGameData.
 // The package will automatically query the ArknightsGameData github repository
-// for the latest commit and will update the local files if the commit is newer
-// than that was last seen.
+// will update the local files if the files are different from the local files.
 package gamedata
 
 import (

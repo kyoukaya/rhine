@@ -3,6 +3,7 @@ package gamedata
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/kyoukaya/rhine/utils"
 )
@@ -18,20 +19,10 @@ func (l logShim) Warnln(i ...interface{})             { l.t.Error(i...) }
 func (l logShim) Warnf(s string, i ...interface{})    { l.t.Errorf(s, i...) }
 
 func TestUpdateGameData(t *testing.T) {
+	startT := time.Now()
 	fileMutex.Lock()
 	updateGameData(logShim{t})
-}
-
-func TestIsLocalDataCurrent(t *testing.T) {
-	fmt.Println(isLocalDataCurrent("bcde4dfb1d8ba306d93ea54b505eed7713540590"))
-}
-
-func TestGetLatestCommit(t *testing.T) {
-	s, err := getLatestCommit()
-	if err != nil {
-		t.Error(err)
-	}
-	fmt.Println(s)
+	fmt.Printf("%dms\n", time.Since(startT).Milliseconds())
 }
 
 func TestStageTable(t *testing.T) {
