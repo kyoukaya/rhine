@@ -182,6 +182,7 @@ func loadVersionFile() map[string]string {
 		return ret
 	}
 	f, err := os.Open(verPath)
+	defer f.Close()
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		toks := bytes.Split(scanner.Bytes(), versionFileDelimiter)
@@ -200,6 +201,7 @@ func loadExcelJSON(region, table string) []byte {
 	defer fileMutex.Unlock()
 	f, err := os.Open(fmt.Sprintf(
 		excelPathFmt, utils.BinDir, regionMap[region], table))
+	defer f.Close()
 	utils.Check(err)
 	b, err := ioutil.ReadAll(f)
 	utils.Check(err)

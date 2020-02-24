@@ -127,6 +127,7 @@ func initFunc(mod *proxy.RhineModule) {
 	utils.Check(err)
 	f, err := os.OpenFile(fmt.Sprintf("%s%s_%s.log", dir, mod.Region, strconv.Itoa(mod.UID)),
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+	defer f.Close()
 	utils.Check(err)
 	fileLogger := log.New(f, "", 0)
 	gd, err := gamedata.New(mod.Region, mod.Logger)
