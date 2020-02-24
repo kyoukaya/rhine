@@ -6,9 +6,15 @@ package gamedata
 
 import (
 	"errors"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path"
+	"strings"
 	"sync"
 
 	"github.com/kyoukaya/rhine/log"
+	"github.com/kyoukaya/rhine/utils"
 	"github.com/kyoukaya/rhine/utils/gamedata/itemtable"
 	"github.com/kyoukaya/rhine/utils/gamedata/stagetable"
 )
@@ -25,8 +31,7 @@ type GameData struct {
 }
 
 var (
-	// ErrInvalidRegion is returned by gamedata.New() if the specified region
-	// is invalid.
+	// ErrInvalidRegion is returned if the specified region is invalid.
 	ErrInvalidRegion = errors.New("Invalid region")
 	state            *gameDataState
 	stateMutex       sync.Mutex
@@ -63,24 +68,80 @@ func New(region string, logger log.Logger) (*GameData, error) {
 
 // GetStageInfo provides a reference to the StageTable struct which contains
 // information about game stages. This call will block if the gamedata has not
-// been loaded yet.
-func (d *GameData) GetStageInfo() *stagetable.StageTable {
+// been loaded yet. Region is an optional argument, by default it will
+// use the region associated with the GameData receiver.
+func (d *GameData) GetStageInfo(region ...string) (*stagetable.StageTable, error) {
+	var regionName string
+	if len(region) > 0 {
+		if _, exists := regionMap[region[0]]; !exists {
+			return nil, ErrInvalidRegion
+		}
+		regionName = region[0]
+	} else {
+		regionName = d.region
+	}
 	stateMutex.Lock()
 	defer stateMutex.Unlock()
-	if _, exists := state.stageTableMap[d.region]; !exists {
-		d.loadStageTable()
+	if _, exists := state.stageTableMap[regionName]; !exists {
+		d.loadStageTable(regionName)
 	}
-	return state.stageTableMap[d.region]
+	return state.stageTableMap[regionName], nil
 }
 
 // GetItemInfo provides a reference to the ItemTable struct which contains
 // information about items. This call will block if the gamedata has not
-// been loaded yet.
-func (d *GameData) GetItemInfo() *itemtable.ItemTable {
+// been loaded yet. Region is an optional argument, by default it will
+// use the region associated with the GameData receiver.
+func (d *GameData) GetItemInfo(region ...string) (*itemtable.ItemTable, error) {
+	var regionName string
+	if len(region) > 0 {
+		if _, exists := regionMap[region[0]]; !exists {
+			return nil, ErrInvalidRegion
+		}
+		regionName = region[0]
+	} else {
+		regionName = d.region
+	}
 	stateMutex.Lock()
 	defer stateMutex.Unlock()
-	if _, exists := state.itemTableMap[d.region]; !exists {
-		d.loadItemTable()
+	if _, exists := state.itemTableMap[regionName]; !exists {
+		d.loadItemTable(regionName)
 	}
-	return state.itemTableMap[d.region]
+	return state.itemTableMap[regionName], nil
+}
+
+// ErrPathOutOfBounds is returned when the fileName specified breaks out the directory.
+var ErrPathOutOfBounds = fmt.Errorf("Path specified breaks out of data directory")
+
+// GetDataBytes gets the raw JSON bytes of the fileName directly from the disk.
+// Region is an optional argument, by default it will use the region
+// associated with the GameData receiver. Any file in fileList is available via
+// this method, but fileName assumes that only the fileName will be given,
+// i.e. "stage_table.json" instead of "/gamedata/excel/stage_table.json".
+func (d *GameData) GetDataBytes(fileName string, region ...string) ([]byte, error) {
+	var regionName string
+	if len(region) > 0 {
+		regionName = regionMap[region[0]]
+		if regionName == "" {
+			return nil, ErrInvalidRegion
+		}
+	} else {
+		regionName = regionMap[d.region]
+	}
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
+	baseDir := path.Clean(
+		fmt.Sprintf("%s/data/%s/gamedata/excel/", utils.BinDir, regionName))
+	fileName = baseDir + "/" + fileName
+	fileName = path.Clean(fileName)
+	// Make sure that baseDir is a prefix to fileName
+	if !strings.HasPrefix(fileName, baseDir) {
+		return nil, ErrPathOutOfBounds
+	}
+	f, err := os.Open(fileName)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	return ioutil.ReadAll(f)
 }

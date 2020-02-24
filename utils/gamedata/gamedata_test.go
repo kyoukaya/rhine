@@ -30,7 +30,8 @@ func TestStageTable(t *testing.T) {
 	targetRegion := "GL"
 	d, err := New(targetRegion, logShim{t})
 	utils.Check(err)
-	table := d.GetStageInfo()
+	table, err := d.GetStageInfo("JP")
+	utils.Check(err)
 	_, exists := table.Stages[targetStage]
 	if !exists {
 		t.Error("Failed to find " + targetStage + " on " + targetRegion)
@@ -42,10 +43,20 @@ func TestItemTable(t *testing.T) {
 	targetRegion := "GL"
 	d, err := New(targetRegion, logShim{t})
 	utils.Check(err)
-	table := d.GetItemInfo()
+	table, err := d.GetItemInfo()
+	utils.Check(err)
 	item, exists := table.Items[targetItem]
 	if !exists {
 		t.Error("Failed to find " + targetItem + " on " + targetRegion)
 	}
 	t.Log(item)
+}
+
+func TestGetDataBytes(t *testing.T) {
+	targetRegion := "GL"
+	d, err := New(targetRegion, logShim{t})
+	utils.Check(err)
+	b, err := d.GetDataBytes("gacha_table.json", targetRegion)
+	utils.Check(err)
+	fmt.Printf("%s\n", b)
 }

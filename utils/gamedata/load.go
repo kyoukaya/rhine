@@ -23,7 +23,6 @@ import (
 
 const (
 	excelPathFmt   = "%s/data/%s/gamedata/excel/%s.json"
-	apiBaseURL     = "https://api.github.com/repos/Kengxxiao/ArknightsGameData/"
 	rawBaseURL     = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/"
 	maxConnections = 4
 )
@@ -87,7 +86,7 @@ func updateGameData(l log.Logger) {
 		lines = append(lines, etag)
 	}
 	// Sort the lines for consistent output
-	sort.Sort(sort.StringSlice(lines))
+	sort.Strings(lines)
 	// write .version file
 	f, err := os.Create(utils.BinDir + "/data/.version")
 	if err != nil {
@@ -182,6 +181,9 @@ func loadVersionFile() map[string]string {
 		return ret
 	}
 	f, err := os.Open(verPath)
+	if err != nil {
+		return ret
+	}
 	defer f.Close()
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
@@ -201,23 +203,23 @@ func loadExcelJSON(region, table string) []byte {
 	defer fileMutex.Unlock()
 	f, err := os.Open(fmt.Sprintf(
 		excelPathFmt, utils.BinDir, regionMap[region], table))
-	defer f.Close()
 	utils.Check(err)
+	defer f.Close()
 	b, err := ioutil.ReadAll(f)
 	utils.Check(err)
 	return b
 }
 
-func (d *GameData) loadStageTable() {
-	b := loadExcelJSON(d.region, "stage_table")
+func (d *GameData) loadStageTable(region string) {
+	b := loadExcelJSON(region, "stage_table")
 	stageTable, err := stagetable.Unmarshal(b)
 	utils.Check(err)
-	state.stageTableMap[d.region] = &stageTable
+	state.stageTableMap[region] = &stageTable
 }
 
-func (d *GameData) loadItemTable() {
-	b := loadExcelJSON(d.region, "item_table")
+func (d *GameData) loadItemTable(region string) {
+	b := loadExcelJSON(region, "item_table")
 	itemTable, err := itemtable.Unmarshal(b)
 	utils.Check(err)
-	state.itemTableMap[d.region] = &itemTable
+	state.itemTableMap[region] = &itemTable
 }

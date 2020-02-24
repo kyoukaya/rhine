@@ -105,8 +105,15 @@ func (mod *modState) battleFinish(data []byte) {
 func (mod *modState) battleStartRoutine(data []byte) {
 	defer mod.mutex.Unlock()
 	if mod.stageTable == nil || mod.itemTable == nil {
-		mod.stageTable = mod.gd.GetStageInfo()
-		mod.itemTable = mod.gd.GetItemInfo()
+		var err error
+		mod.stageTable, err = mod.gd.GetStageInfo()
+		if err != nil {
+			mod.Warnln(err)
+		}
+		mod.itemTable, err = mod.gd.GetItemInfo()
+		if err != nil {
+			mod.Warnln(err)
+		}
 	}
 	mod.isPractice = gjson.GetBytes(data, "usePracticeTicket").Bool()
 	mod.currStage = gjson.GetBytes(data, "stageId").String()
@@ -127,8 +134,8 @@ func initFunc(mod *proxy.RhineModule) {
 	utils.Check(err)
 	f, err := os.OpenFile(fmt.Sprintf("%s%s_%s.log", dir, mod.Region, strconv.Itoa(mod.UID)),
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
-	defer f.Close()
 	utils.Check(err)
+	defer f.Close()
 	fileLogger := log.New(f, "", 0)
 	gd, err := gamedata.New(mod.Region, mod.Logger)
 	utils.Check(err)
