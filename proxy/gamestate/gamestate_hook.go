@@ -1,11 +1,11 @@
 package gamestate
 
 type GameStateHook struct {
-	path        string
-	moduleName  string
-	listener    chan StateEvent
-	gs          *GameState
-	wantPayload bool
+	target     string
+	moduleName string
+	listener   chan StateEvent
+	gs         *GameState
+	event      bool
 }
 
 type StateEvent struct {
@@ -21,7 +21,7 @@ func (oldHook *GameStateHook) Unhook() {
 	}
 	oldHook.gs.stateMutex.Lock()
 	defer oldHook.gs.stateMutex.Unlock()
-	oldHooks := oldHook.gs.stateHooks[oldHook.path]
+	oldHooks := oldHook.gs.stateHooks[oldHook.target]
 	i := 0
 	for _, hook := range oldHooks {
 		if hook == oldHook {
@@ -29,7 +29,7 @@ func (oldHook *GameStateHook) Unhook() {
 		}
 		i++
 	}
-	oldHook.gs.stateHooks[oldHook.path] = append(oldHooks[:i], oldHooks[i+1:]...)
+	oldHook.gs.stateHooks[oldHook.target] = append(oldHooks[:i], oldHooks[i+1:]...)
 }
 
 // Caller is assumed to be holding the mutex.
@@ -38,20 +38,20 @@ func (mod *GameState) parseHookQueue() {
 		var hook *GameStateHook
 		select {
 		case hook = <-mod.hookQueue:
-			mod.stateHooks[hook.path] = append(mod.stateHooks[hook.path], hook)
+			mod.stateHooks[hook.target] = append(mod.stateHooks[hook.target], hook)
 		default:
 			return
 		}
 	}
 }
 
-func (mod *GameState) Hook(path, moduleName string, listener chan StateEvent, wantPayload bool) *GameStateHook {
+func (mod *GameState) Hook(target, moduleName string, listener chan StateEvent, event bool) *GameStateHook {
 	hook := &GameStateHook{
-		path:        path,
-		moduleName:  moduleName,
-		listener:    listener,
-		gs:          mod,
-		wantPayload: wantPayload,
+		target:     target,
+		moduleName: moduleName,
+		listener:   listener,
+		gs:         mod,
+		event:      event,
 	}
 	select {
 	case mod.hookQueue <- hook:

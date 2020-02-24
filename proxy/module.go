@@ -58,10 +58,9 @@ func (m *RhineModule) Hook(target string, priority int, handler PacketHandler) H
 
 // StateHook registers a new game state hook whose listener chan will be notified
 // when the specified game state has been modified. The StateEvent passed through
-// the chan will include the new state at the path if the wantPayload bool is set
-// to true.
-func (m *RhineModule) StateHook(path string, listener chan gamestate.StateEvent, wantPayload bool) Hooker {
-	return m.gameState.Hook(path, m.name, listener, wantPayload)
+// the chan will exclude the new state at the path if the event bool is set to true.
+func (m *RhineModule) StateHook(target string, listener chan gamestate.StateEvent, event bool) Hooker {
+	return m.gameState.Hook(target, m.name, listener, event)
 }
 
 // OnShutdown registers a void function which accepts a boolean argument to be called

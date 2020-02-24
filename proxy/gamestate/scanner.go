@@ -71,7 +71,7 @@ func (mod *GameState) WalkAndNotify(data []byte) error {
 			}
 			var payload interface{}
 			for _, hook := range mod.stateHooks[curPath] {
-				if hook.wantPayload {
+				if !hook.event {
 					if payload != nil {
 						evt.Payload = payload
 					} else {
@@ -87,7 +87,7 @@ func (mod *GameState) WalkAndNotify(data []byte) error {
 				case hook.listener <- evt:
 				default:
 					mod.log.Warnf("GameState notification for %s:%s dropped",
-						hook.moduleName, hook.path)
+						hook.moduleName, hook.target)
 				}
 				evt.Payload = nil
 			}
