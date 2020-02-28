@@ -51,12 +51,3 @@ func TestItemTable(t *testing.T) {
 	}
 	t.Log(item)
 }
-
-func TestGetDataBytes(t *testing.T) {
-	targetRegion := "GL"
-	d, err := New(targetRegion, logShim{t})
-	utils.Check(err)
-	b, err := d.GetDataBytes("gacha_table.json", targetRegion)
-	utils.Check(err)
-	fmt.Printf("%s\n", b)
-}
