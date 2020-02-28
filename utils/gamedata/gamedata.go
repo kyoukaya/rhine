@@ -7,14 +7,9 @@ package gamedata
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path"
-	"strings"
 	"sync"
 
 	"github.com/kyoukaya/rhine/log"
-	"github.com/kyoukaya/rhine/utils"
 	"github.com/kyoukaya/rhine/utils/gamedata/itemtable"
 	"github.com/kyoukaya/rhine/utils/gamedata/stagetable"
 )
@@ -112,36 +107,3 @@ func (d *GameData) GetItemInfo(region ...string) (*itemtable.ItemTable, error) {
 
 // ErrPathOutOfBounds is returned when the fileName specified breaks out the directory.
 var ErrPathOutOfBounds = fmt.Errorf("Path specified breaks out of data directory")
-
-// GetDataBytes gets the raw JSON bytes of the fileName directly from the disk.
-// Region is an optional argument, by default it will use the region
-// associated with the GameData receiver. Any file in fileList is available via
-// this method, but fileName assumes that only the fileName will be given,
-// i.e. "stage_table.json" instead of "/gamedata/excel/stage_table.json".
-func (d *GameData) GetDataBytes(fileName string, region ...string) ([]byte, error) {
-	var regionName string
-	if len(region) > 0 {
-		regionName = regionMap[region[0]]
-		if regionName == "" {
-			return nil, ErrInvalidRegion
-		}
-	} else {
-		regionName = regionMap[d.region]
-	}
-	fileMutex.Lock()
-	defer fileMutex.Unlock()
-	baseDir := path.Clean(
-		fmt.Sprintf("%s/data/%s/gamedata/excel/", utils.BinDir, regionName))
-	fileName = baseDir + "/" + fileName
-	fileName = path.Clean(fileName)
-	// Make sure that baseDir is a prefix to fileName
-	if !strings.HasPrefix(fileName, baseDir) {
-		return nil, ErrPathOutOfBounds
-	}
-	f, err := os.Open(fileName)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	return ioutil.ReadAll(f)
-}
