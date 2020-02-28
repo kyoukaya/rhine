@@ -90,7 +90,10 @@ func NewProxy(options *Options) *Proxy {
 			proxyFilter = options.HostFilter
 		}
 	}
+
 	server := goproxy.NewProxyHttpServer()
+	server.CertStore = newCertStore(logger)
+
 	server.Logger = printfFunc(logShim(logger))
 	server.Verbose = options.VerboseGoProxy
 	proxy := &Proxy{
@@ -119,7 +122,6 @@ func NewProxy(options *Options) *Proxy {
 		proxy.Warnln(err)
 		panic(err)
 	}
-
 	server.OnRequest().HandleConnect(goproxy.FuncHttpsHandler(proxy.httpsHandler))
 	return proxy
 }
