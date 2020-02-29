@@ -46,6 +46,7 @@ type Options struct {
 	Verbose          bool           // log more Rhine information
 	VerboseGoProxy   bool           // log every GoProxy request to stdout
 	Address          string         // proxy listen address, defaults to ":8080"
+	DisableCertStore bool           // Disables the built in certstore, reduces memory usage but increases HTTP latency and CPU usage.
 }
 
 // Proxy contains the internal state relevant to the proxy
@@ -92,7 +93,9 @@ func NewProxy(options *Options) *Proxy {
 	}
 
 	server := goproxy.NewProxyHttpServer()
-	server.CertStore = newCertStore(logger)
+	if !options.DisableCertStore {
+		server.CertStore = newCertStore(logger)
+	}
 
 	server.Logger = printfFunc(logShim(logger))
 	server.Verbose = options.VerboseGoProxy
