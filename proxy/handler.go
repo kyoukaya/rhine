@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	gameHostMatcher = regexp.MustCompile(`^gs\.arknights\.(jp|global):8443$`)
+	gameHostMatcher = regexp.MustCompile(`^gs\.arknights\.(jp|kr|global):8?443$`)
 )
 
 // HandleReq processes an outgoing HTTP request, dispatching it if it's game traffic.

@@ -1,6 +1,6 @@
 # Rhine
 
-Rhine is a modular framework for intercepting, processing, and dispatching game traffic for Arknight's global and Japanese servers by means of a HTTPS proxy.
+Rhine is a modular framework for intercepting, processing, and dispatching game traffic for Arknight's global, Japanese and Korean servers by means of a HTTPS proxy.
 Optionally, Rhine can also block requests to telemetry or ad domains frequently contacted when using an android emulator.
 
 ## Usage
@@ -10,7 +10,7 @@ Execute `go run cmd/example/rhine.go` to start the proxy server, and then direct
 
 ## Modules
 
-The 2 provided example modules in this repository are pretty self explanatory, `packetlogger` logs the raw body of each game packet, while `droplogger` logs the drops from each battle. 
+The 2 provided example modules in this repository are pretty self explanatory, `packetlogger` logs the raw body of each game packet, while `droplogger` logs the drops from each battle.
 Besides the modules provided in this repository, you can also try out the [ak-discordrpc](https://github.com/kyoukaya/ak-discordrpc) module.
 
 ## Development
@@ -42,7 +42,7 @@ func (modState) cleanUp(shuttingDown bool) {}
 
 func initFunc(mod *proxy.RhineModule) {
 	state := modState{}
-	
+
 	mod.OnShutdown(state.cleanUp)
 	mod.Hook("S/quest/battleStart", 0, mod.handle)
 }
