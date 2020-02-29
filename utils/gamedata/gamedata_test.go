@@ -30,11 +30,17 @@ func TestStageTable(t *testing.T) {
 	targetRegion := "GL"
 	d, err := New(targetRegion, logShim{t})
 	utils.Check(err)
-	table, err := d.GetStageInfo("JP")
+	table_jp, err := d.GetStageInfo("JP")
 	utils.Check(err)
-	_, exists := table.Stages[targetStage]
-	if !exists {
-		t.Error("Failed to find " + targetStage + " on " + targetRegion)
+	table_kr, err := d.GetStageInfo("KR")
+	utils.Check(err)
+	_, exists_jp := table_jp.Stages[targetStage]
+	_, exists_kr := table_kr.Stages[targetStage]
+	if !exists_jp {
+		t.Error("Failed to find " + targetStage + " on " + targetRegion + " in JP")
+	}
+	if !exists_kr {
+		t.Error("Failed to find " + targetStage + " on " + targetRegion + " in KR")
 	}
 }
 

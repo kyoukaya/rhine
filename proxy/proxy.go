@@ -19,10 +19,11 @@ import (
 
 var (
 	// regionMap maps the TLD of the host string to their constant regional
-	// representation: ["GL", "JP"]
+	// representation: ["GL", "JP", "KR"]
 	regionMap = map[string]string{
 		"global": "GL",
 		"jp":     "JP",
+		"kr":     "KR",
 	}
 	// onStartCbs will be called when proxy.Run() is called.
 	onStartCbs []func(log.Logger)

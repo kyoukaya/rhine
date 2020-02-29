@@ -34,13 +34,14 @@ var (
 	regionMap        = map[string]string{
 		"GL": "en_US",
 		"JP": "ja_JP",
+		"KR": "ko_KR",
 	}
 )
 
 // New creates a new GameData struct, may return an error if an invalid region
 // is provided. Refer to proxy.regionMap for valid region strings.
 func New(region string, logger log.Logger) (*GameData, error) {
-	if region != "GL" && region != "JP" {
+	if region != "GL" && region != "JP" && region != "KR" {
 		return nil, ErrInvalidRegion
 	}
 	stateMutex.Lock()
