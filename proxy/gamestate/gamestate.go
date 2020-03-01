@@ -88,7 +88,7 @@ func (mod *GameState) parseDataDelta(data []byte, op string) {
 		return
 	}
 	// Could do an unsafe string cast here for performance
-	b := []byte(res.String())
+	b := []byte(res.Raw)
 	user, err := unmarshalUserData(b)
 	if err != nil {
 		mod.log.Warnf("Failed to unmarshal %s: %s", op, err.Error())
@@ -109,6 +109,7 @@ func (mod *GameState) parseDataDelta(data []byte, op string) {
 func (mod *GameState) handle(op string, data []byte, pktCtx *goproxy.ProxyCtx) {
 	if op == "S/account/syncData" {
 		go mod.handleSyncData(data)
+		mod.loaded = true
 	} else if mod.loaded {
 		mod.stateMutex.Lock()
 		go mod.parseDataDelta(data, op)
@@ -126,7 +127,6 @@ func (mod *GameState) handleSyncData(data []byte) []byte {
 		mod.log.Warnln(err)
 		return data
 	}
-	mod.loaded = true
 	return data
 }
 
