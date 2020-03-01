@@ -285,7 +285,7 @@ type Gain struct {
 type WorkshopInfo struct {
 	Buff struct {
 		Rate *struct {
-			All       int64   `json:"all"`
+			All       float64 `json:"all"`
 			WBuilding float64 `json:"W_BUILDING"`
 		} `json:"rate"`
 		Cost *struct {
