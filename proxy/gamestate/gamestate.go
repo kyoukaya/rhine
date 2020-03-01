@@ -4,16 +4,17 @@
 package gamestate
 
 import (
+	"bytes"
 	"encoding/json"
 	"sync"
 
-	"github.com/kyoukaya/go-lookup"
 	rhLog "github.com/kyoukaya/rhine/log"
 	"github.com/kyoukaya/rhine/proxy/gamestate/statestruct"
-	"github.com/svyotov/mergo"
-	"github.com/tidwall/gjson"
 
 	"github.com/elazarl/goproxy"
+	"github.com/kyoukaya/go-lookup"
+	"github.com/svyotov/mergo"
+	"github.com/tidwall/gjson"
 )
 
 const hookQueueMax = 100
@@ -25,6 +26,7 @@ type GameState struct {
 	stateMutex sync.Mutex
 	log        rhLog.Logger
 	loaded     bool
+	strict     bool
 	// Hooks are first added into the hookQueue and then added into the
 	// stateHooks map just before notifying listeners with parseHookQueue.
 	hookQueue  chan *GameStateHook
@@ -33,9 +35,10 @@ type GameState struct {
 
 // New provides a newly instantiated GameState struct and a callback for the
 // proxy to call on every game packet.
-func New(log rhLog.Logger) (*GameState, func(string, []byte, *goproxy.ProxyCtx)) {
+func New(log rhLog.Logger, strict bool) (*GameState, func(string, []byte, *goproxy.ProxyCtx)) {
 	gs := GameState{
 		log:        log,
+		strict:     strict,
 		stateHooks: make(map[string][]*GameStateHook),
 		hookQueue:  make(chan *GameStateHook, hookQueueMax),
 	}
@@ -89,10 +92,9 @@ func (mod *GameState) parseDataDelta(data []byte, op string) {
 	}
 	// Could do an unsafe string cast here for performance
 	b := []byte(res.Raw)
-	user, err := unmarshalUserData(b)
+	user, err := unmarshalUserData(b, mod.strict)
 	if err != nil {
-		mod.log.Warnf("Failed to unmarshal %s: %s", op, err.Error())
-		return
+		mod.log.Warnf("%s:%s\n%s", op, err.Error(), data)
 	}
 	err = mergo.Merge(mod.state, user, mergo.WithOverride)
 	if err != nil {
@@ -118,25 +120,35 @@ func (mod *GameState) handle(op string, data []byte, pktCtx *goproxy.ProxyCtx) {
 
 func (mod *GameState) handleSyncData(data []byte) []byte {
 	defer mod.stateMutex.Unlock()
-	syncData, err := unmarshalSyncData(data)
+	syncData, err := unmarshalSyncData(data, mod.strict)
 	if err != nil {
-		mod.log.Warnln(err)
+		mod.log.Warnf("%s:\n%s", err, data)
 	}
 	mod.state = &syncData.User
-	if err != nil {
-		mod.log.Warnln(err)
-		return data
-	}
 	return data
 }
 
-func unmarshalSyncData(data []byte) (*syncData, error) {
+func unmarshalSyncData(data []byte, strict bool) (*syncData, error) {
+	if strict {
+		dec := json.NewDecoder(bytes.NewBuffer(data))
+		dec.DisallowUnknownFields()
+		r := syncData{}
+		err := dec.Decode(&r)
+		return &r, err
+	}
 	r := syncData{}
 	err := json.Unmarshal(data, &r)
 	return &r, err
 }
 
-func unmarshalUserData(data []byte) (*statestruct.User, error) {
+func unmarshalUserData(data []byte, strict bool) (*statestruct.User, error) {
+	if strict {
+		dec := json.NewDecoder(bytes.NewBuffer(data))
+		dec.DisallowUnknownFields()
+		r := statestruct.User{}
+		err := dec.Decode(&r)
+		return &r, err
+	}
 	r := &statestruct.User{}
 	err := json.Unmarshal(data, r)
 	return r, err

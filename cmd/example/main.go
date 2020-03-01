@@ -21,6 +21,7 @@ var verbose = flag.Bool("v", false, "print Rhine verbose messages")
 var verboseGoProxy = flag.Bool("v-goproxy", false, "print verbose goproxy messages")
 var host = flag.String("host", ":8080", "hostname:port")
 var disableCertStore = flag.Bool("disable-cert-store", false, "disables the built in certstore, reduces memory usage but increases HTTP latency and CPU usage")
+var noUnknownJSON = flag.Bool("no-unk-json", false, "disallows unknown fields when unmarshalling json in the gamestate module")
 
 func main() {
 	flag.Parse()
@@ -37,6 +38,7 @@ func main() {
 		VerboseGoProxy:   *verboseGoProxy,
 		Address:          *host,
 		DisableCertStore: *disableCertStore,
+		NoUnknownJSON:    *noUnknownJSON,
 	}
 	rhine := proxy.NewProxy(options)
 	rhine.Start()

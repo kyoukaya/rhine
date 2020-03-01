@@ -33,7 +33,7 @@ func openAndRead(t *testing.T, filename string) []byte {
 // TestHookWithPayload registers a hook which receives the value that has
 // changed when an event is emitted.
 func TestHookWithPayload(t *testing.T) {
-	mod, _ := New(logShim{t})
+	mod, _ := New(logShim{t}, true)
 	mod.handle("S/account/syncData", openAndRead(t, "testdata/syncdata.json"), nil)
 	testChan := make(chan StateEvent, 1)
 	done := make(chan error)
@@ -51,13 +51,14 @@ func TestHookWithPayload(t *testing.T) {
 }
 
 func TestGamestate(t *testing.T) {
-	mod, _ := New(logShim{t})
+	mod, _ := New(logShim{t}, true)
 	mod.handle("S/account/syncData", openAndRead(t, "testdata/syncdata.json"), nil)
+	mod.StateSync()
 }
 func TestModificationHooks(t *testing.T) {
 	const testPath = "dexNav.enemy.stage.camp_02"
 	testChan := make(chan StateEvent, 1)
-	mod, _ := New(logShim{t})
+	mod, _ := New(logShim{t}, true)
 	hook := mod.Hook(testPath, "test", testChan, false)
 	mod.handle("S/account/syncData", openAndRead(t, "testdata/syncdata.json"), nil)
 	b := openAndRead(t, "testdata/buildingsync.json")
@@ -87,7 +88,7 @@ func TestModificationHooks(t *testing.T) {
 // map[string]interface{} did not add new entries in the map. Workaround with
 // map[string]struct{} instead.
 func TestMapInterfaceBug(t *testing.T) {
-	mod, _ := New(logShim{t})
+	mod, _ := New(logShim{t}, true)
 	mod.handle("S/account/syncData", openAndRead(t, "testdata/syncdata.json"), nil)
 	mod.handle("S/building/sync", openAndRead(t, "testdata/buildingsync.json"), nil)
 	mod.StateSync()
@@ -97,7 +98,7 @@ func TestMapInterfaceBug(t *testing.T) {
 }
 
 func TestStructAccess(t *testing.T) {
-	mod, _ := New(logShim{t})
+	mod, _ := New(logShim{t}, true)
 	mod.handle("S/account/syncData", openAndRead(t, "testdata/syncdata.json"), nil)
 	val, err := mod.Get("building.rooms")
 	check(t, err)
@@ -112,7 +113,7 @@ func TestStructAccess(t *testing.T) {
 // mod.handle has a latency of about 150-200ms, there's a lot of room for improvement
 // here but it's usually not noticeable since it's typically faster than the game client.
 func BenchmarkHandleSync(b *testing.B) {
-	mod, _ := New(nil)
+	mod, _ := New(nil, true)
 	data := openAndRead(nil, "testdata/syncdata.json")
 	for i := 0; i < b.N; i++ {
 		mod.handle("S/account/syncData", data, nil)

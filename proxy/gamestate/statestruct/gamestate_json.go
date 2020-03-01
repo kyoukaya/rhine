@@ -18,14 +18,11 @@ type User struct {
 	Skin    *struct {
 		CharacterSkins map[string]int64 `json:"characterSkins"`
 	} `json:"skin"`
-	PushFlags *PushFlags   `json:"pushFlags"`
-	Troop     *Troop       `json:"troop"`
-	CheckIn   *UserCheckIn `json:"checkIn"`
-	Activity  *struct {
-		Default     EmptyStruct            `json:"DEFAULT"`
-		MissionOnly map[string]EmptyStruct `json:"MISSION_ONLY"`
-	} `json:"activity"`
-	Mission          *Mission `json:"mission"`
+	PushFlags        *PushFlags   `json:"pushFlags"`
+	Troop            *Troop       `json:"troop"`
+	CheckIn          *UserCheckIn `json:"checkIn"`
+	Activity         *Activities  `json:"activity"`
+	Mission          *Mission     `json:"mission"`
 	CollectionReward *struct {
 		Team map[string]int64 `json:"team"`
 	} `json:"collectionReward"`
@@ -36,6 +33,17 @@ type User struct {
 	Event      *struct {
 		Building int64 `json:"building"`
 	} `json:"event"`
+}
+
+type Activities struct {
+	Default     EmptyStruct            `json:"DEFAULT"`
+	MissionOnly map[string]EmptyStruct `json:"MISSION_ONLY"`
+	CheckinOnly *struct {
+		Act1D5 *struct {
+			LastTs  int64   `json:"lastTs"`
+			History []int64 `json:"history"`
+		} `json:"act1d5"`
+	} `json:"CHECKIN_ONLY"`
 }
 
 type Building struct {
@@ -93,6 +101,24 @@ type Rooms struct {
 	Workshop    map[string]WorkshopInfo    `json:"WORKSHOP"`
 	Meeting     map[string]MeetingInfo     `json:"MEETING"`
 	Hire        map[string]HireInfo        `json:"HIRE"`
+	Training    map[string]TrainingInfo    `json:"TRAINING"`
+}
+
+type TrainingInfo struct {
+	Buff           SpeedContainer `json:"buff"`
+	State          int64          `json:"state"`
+	LastUpdateTime int64          `json:"lastUpdateTime"`
+	Trainee        struct {
+		CharInstID   int64   `json:"charInstId"`
+		State        int64   `json:"state"`
+		TargetSkill  int64   `json:"targetSkill"`
+		ProcessPoint int64   `json:"processPoint"`
+		Speed        float64 `json:"speed"`
+	} `json:"trainee"`
+	Trainer struct {
+		CharInstID int64 `json:"charInstId"`
+		State      int64 `json:"state"`
+	} `json:"trainer"`
 }
 
 type ControlSlot struct {
@@ -124,7 +150,7 @@ type DormInfoBuff struct {
 			Target *int64 `json:"target"`
 			Value  int64  `json:"value"`
 		} `json:"single"`
-		Self EmptyStruct `json:"self"`
+		Self map[string]int64 `json:"self"`
 	} `json:"apCost"`
 }
 
@@ -228,6 +254,7 @@ type Stock struct {
 	NickNum string        `json:"nickNum"`
 	Chars   []CharElement `json:"chars"`
 	InUse   int64         `json:"inUse"`
+	Ts      int64         `json:"ts"`
 }
 
 type CharElement struct {
@@ -287,6 +314,8 @@ type WorkshopInfo struct {
 		Rate *struct {
 			All       float64 `json:"all"`
 			WBuilding float64 `json:"W_BUILDING"`
+			WEvolve   float64 `json:"W_EVOLVE"`
+			WSkill    float64 `json:"W_SKILL"`
 		} `json:"rate"`
 		Cost *struct {
 			Type      string `json:"type"`

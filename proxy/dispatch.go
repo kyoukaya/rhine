@@ -18,13 +18,14 @@ type dispatch struct {
 	log.Logger
 
 	// Private fields
-	mutex        *sync.Mutex
-	uid          int
-	region       string
-	hooks        map[string][]*PacketHook
-	coreHandlers []func(string, []byte, *goproxy.ProxyCtx)
-	modules      []*RhineModule
-	intialized   bool
+	mutex         *sync.Mutex
+	uid           int
+	region        string
+	hooks         map[string][]*PacketHook
+	coreHandlers  []func(string, []byte, *goproxy.ProxyCtx)
+	modules       []*RhineModule
+	intialized    bool
+	noUnknownJSON bool
 
 	// Core modules
 	state *gamestate.GameState
@@ -64,7 +65,7 @@ func (d *dispatch) hookWrapper(hook *PacketHook, op string, data []byte, ctx *go
 func (d *dispatch) initMods(mods []initFunc) {
 	startT := time.Now()
 	// Load core modules
-	gs, gsHandler := gamestate.New(d.Logger)
+	gs, gsHandler := gamestate.New(d.Logger, d.noUnknownJSON)
 	d.state = gs
 	d.coreHandlers = append(d.coreHandlers, gsHandler)
 	// Load user modules

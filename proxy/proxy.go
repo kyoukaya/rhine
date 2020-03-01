@@ -48,6 +48,7 @@ type Options struct {
 	VerboseGoProxy   bool           // log every GoProxy request to stdout
 	Address          string         // proxy listen address, defaults to ":8080"
 	DisableCertStore bool           // Disables the built in certstore, reduces memory usage but increases HTTP latency and CPU usage.
+	NoUnknownJSON    bool           // Disallows unknown fields when unmarshalling json in the gamestate module.
 }
 
 // Proxy contains the internal state relevant to the proxy
@@ -222,11 +223,12 @@ func (p *Proxy) addUser(UID, region string) *dispatch {
 	UIDint, err := strconv.Atoi(UID)
 	utils.Check(err)
 	d := &dispatch{
-		mutex:  &sync.Mutex{},
-		uid:    UIDint,
-		region: region,
-		hooks:  make(map[string][]*PacketHook),
-		Logger: p.Logger,
+		mutex:         &sync.Mutex{},
+		noUnknownJSON: p.options.NoUnknownJSON,
+		uid:           UIDint,
+		region:        region,
+		hooks:         make(map[string][]*PacketHook),
+		Logger:        p.Logger,
 	}
 	d.initMods(modules)
 	p.dispatches[rUID] = d
