@@ -198,6 +198,7 @@ func loadVersionFile() map[string]string {
 	}
 	return ret
 }
+
 func loadExcelJSON(region, table string) []byte {
 	fileMutex.Lock()
 	defer fileMutex.Unlock()

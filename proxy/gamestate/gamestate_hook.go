@@ -13,10 +13,10 @@ type StateEvent struct {
 	Payload interface{}
 }
 
-// Unhook unhooks the hook from the gamestate. Will fail silently if the hook
-// is already unhooked.
+// Unhook unhooks the hook from the gamestate.
 func (oldHook *GameStateHook) Unhook() {
 	if oldHook == nil {
+		oldHook.gs.log.Warnf("GameStateHook.Unhook called on nil receiver")
 		return
 	}
 	oldHook.gs.stateMutex.Lock()
@@ -29,22 +29,26 @@ func (oldHook *GameStateHook) Unhook() {
 		}
 		i++
 	}
+	if i == len(oldHooks) {
+		// Hook not found
+		return
+	}
 	oldHook.gs.stateHooks[oldHook.target] = append(oldHooks[:i], oldHooks[i+1:]...)
 }
 
-// Caller is assumed to be holding the mutex.
 func (mod *GameState) parseHookQueue() {
-	for {
-		var hook *GameStateHook
-		select {
-		case hook = <-mod.hookQueue:
-			mod.stateHooks[hook.target] = append(mod.stateHooks[hook.target], hook)
-		default:
-			return
-		}
+	for hook := range mod.hookQueue {
+		mod.stateMutex.Lock()
+		mod.stateHooks[hook.target] = append(mod.stateHooks[hook.target], hook)
+		mod.stateMutex.Unlock()
 	}
 }
 
+// Hook creates a GameStateHook and attaches it as soon as possible. Notably, users
+// should not expect the hook to be attached when the function returns as the attaching
+// is done in a separate goroutine, allowing users to hook without blocking when
+// the module is initialized on account/login, i.e., before game state is initialized
+// from the SyncData packet.
 func (mod *GameState) Hook(target, moduleName string, listener chan StateEvent, event bool) *GameStateHook {
 	hook := &GameStateHook{
 		target:     target,

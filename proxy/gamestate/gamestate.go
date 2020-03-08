@@ -36,14 +36,15 @@ type GameState struct {
 // New provides a newly instantiated GameState struct and a callback for the
 // proxy to call on every game packet.
 func New(log rhLog.Logger, strict bool) (*GameState, func(string, []byte, *goproxy.ProxyCtx)) {
-	gs := GameState{
+	mod := GameState{
 		log:        log,
 		strict:     strict,
 		stateHooks: make(map[string][]*GameStateHook),
 		hookQueue:  make(chan *GameStateHook, hookQueueMax),
 	}
-	gs.stateMutex.Lock()
-	return &gs, gs.handle
+	mod.stateMutex.Lock()
+	go mod.parseHookQueue()
+	return &mod, mod.handle
 }
 
 // IsLoaded checks if the initial sync packet has already been parsed and the

@@ -31,7 +31,7 @@ var (
 			return &sl
 		},
 	}
-	MaxPathError = errors.New("Maximum path depth reached")
+	ErrMaxPath = errors.New("Maximum path depth reached")
 )
 
 // WalkAndNotify utilizes the scanner statemachine from the standard library to
@@ -44,8 +44,6 @@ func (mod *GameState) WalkAndNotify(data []byte) error {
 	defer func() {
 		pathPool.Put(&path)
 	}()
-
-	mod.parseHookQueue()
 
 	var lastLiteralPos int
 	for i, c := range data {
@@ -61,7 +59,7 @@ func (mod *GameState) WalkAndNotify(data []byte) error {
 			// This shouldn't happen, the game state object is nowhere nearly as
 			// nested as 64 objects deep.
 			if depth > maxPathDepth {
-				return MaxPathError
+				return ErrMaxPath
 			}
 			path[depth-1] = data[lastLiteralPos+1 : i-1]
 

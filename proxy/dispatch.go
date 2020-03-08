@@ -100,6 +100,10 @@ func (d *dispatch) removeHook(oldHook *PacketHook) {
 		}
 		i++
 	}
+	if i == len(hooks) {
+		// Hook not found
+		return
+	}
 	d.hooks[oldHook.target] = append(hooks[:i], hooks[i+1:]...)
 }
 
