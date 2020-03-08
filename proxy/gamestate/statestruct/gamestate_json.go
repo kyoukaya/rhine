@@ -207,19 +207,12 @@ type MeetingInfo struct {
 		Speed  float64 `json:"speed"`
 		Weight Weight  `json:"weight"`
 	} `json:"buff"`
-	State        int64   `json:"state"`
-	Speed        float64 `json:"speed"`
-	ProcessPoint float64 `json:"processPoint"`
-	OwnStock     []Stock `json:"ownStock"`
-	ReceiveStock []Stock `json:"receiveStock"`
-	Board        struct {
-		Rhine      string `json:"RHINE"`
-		Blacksteel string `json:"BLACKSTEEL"`
-		Ursus      string `json:"URSUS"`
-		Glasgow    string `json:"GLASGOW"`
-		Kjerag     string `json:"KJERAG"`
-		Rhodes     string `json:"RHODES"`
-	} `json:"board"`
+	State        int64             `json:"state"`
+	Speed        float64           `json:"speed"`
+	ProcessPoint float64           `json:"processPoint"`
+	OwnStock     []Stock           `json:"ownStock"`
+	ReceiveStock []Stock           `json:"receiveStock"`
+	Board        map[string]string `json:"board"`
 	SocialReward struct {
 		Daily  int64 `json:"daily"`
 		Search int64 `json:"search"`
