@@ -54,7 +54,10 @@ func TestGamestate(t *testing.T) {
 	mod, _ := New(logShim{t}, true)
 	mod.handle("S/account/syncData", openAndRead(t, "testdata/syncdata.json"), nil)
 	mod.StateSync()
+	mod.handle("S/building/sync", openAndRead(t, "testdata/buildingsync.json"), nil)
+	mod.StateSync()
 }
+
 func TestModificationHooks(t *testing.T) {
 	const testPath = "dexNav.enemy.stage.camp_02"
 	testChan := make(chan StateEvent, 1)

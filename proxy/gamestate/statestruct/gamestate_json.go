@@ -38,12 +38,12 @@ type User struct {
 type Activities struct {
 	Default     EmptyStruct            `json:"DEFAULT"`
 	MissionOnly map[string]EmptyStruct `json:"MISSION_ONLY"`
-	CheckinOnly *struct {
-		Act1D5 *struct {
-			LastTs  int64   `json:"lastTs"`
-			History []int64 `json:"history"`
-		} `json:"act1d5"`
-	} `json:"CHECKIN_ONLY"`
+	CheckinOnly map[string]CheckinInfo `json:"CHECKIN_ONLY"`
+}
+
+type CheckinInfo struct {
+	LastTs  int64   `json:"lastTs"`
+	History []int64 `json:"history"`
 }
 
 type Building struct {
@@ -126,9 +126,9 @@ type ControlSlot struct {
 		Global struct {
 			ApCost int64 `json:"apCost"`
 		} `json:"global"`
-		Manufacture SpeedContainer `json:"manufacture"`
-		Trading     SpeedContainer `json:"trading"`
-		ApCost      EmptyStruct    `json:"apCost"`
+		Manufacture SpeedContainer   `json:"manufacture"`
+		Trading     SpeedContainer   `json:"trading"`
+		ApCost      map[string]int64 `json:"apCost"`
 	} `json:"buff"`
 	ApCost int64 `json:"apCost"`
 }
@@ -184,7 +184,7 @@ type HireInfo struct {
 type ManufactureInfo struct {
 	Buff struct {
 		ApCost struct {
-			Self EmptyStruct `json:"self"`
+			Self map[string]int64 `json:"self"`
 		} `json:"apCost"`
 		Speed    float64 `json:"speed"`
 		Capacity int64   `json:"capacity"`
@@ -207,26 +207,19 @@ type MeetingInfo struct {
 		Speed  float64 `json:"speed"`
 		Weight Weight  `json:"weight"`
 	} `json:"buff"`
-	State        int64   `json:"state"`
-	Speed        float64 `json:"speed"`
-	ProcessPoint float64 `json:"processPoint"`
-	OwnStock     []Stock `json:"ownStock"`
-	ReceiveStock []Stock `json:"receiveStock"`
-	Board        struct {
-		Rhine      string `json:"RHINE"`
-		Blacksteel string `json:"BLACKSTEEL"`
-		Ursus      string `json:"URSUS"`
-		Glasgow    string `json:"GLASGOW"`
-		Kjerag     string `json:"KJERAG"`
-		Rhodes     string `json:"RHODES"`
-	} `json:"board"`
+	State        int64             `json:"state"`
+	Speed        float64           `json:"speed"`
+	ProcessPoint float64           `json:"processPoint"`
+	OwnStock     []Stock           `json:"ownStock"`
+	ReceiveStock []Stock           `json:"receiveStock"`
+	Board        map[string]string `json:"board"`
 	SocialReward struct {
 		Daily  int64 `json:"daily"`
 		Search int64 `json:"search"`
 	} `json:"socialReward"`
-	DailyReward   EmptyStruct `json:"dailyReward"`
-	ExpiredReward int64       `json:"expiredReward"`
-	Received      int64       `json:"received"`
+	DailyReward   *Stock `json:"dailyReward"`
+	ExpiredReward int64  `json:"expiredReward"`
+	Received      int64  `json:"received"`
 	InfoShare     struct {
 		Ts     int64 `json:"ts"`
 		Reward int64 `json:"reward"`
