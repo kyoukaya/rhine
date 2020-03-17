@@ -15,7 +15,7 @@ var BinDir = func() string {
 	if err != nil {
 		panic(err)
 	}
-	return filepath.Dir(ex) + "/"
+	return filepath.Clean(filepath.Dir(ex) + "/")
 }()
 
 // Check if an error has occurred and panics if it has.

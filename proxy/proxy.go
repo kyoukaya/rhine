@@ -121,6 +121,7 @@ func NewProxy(options *Options) *Proxy {
 			proxy.Warnln(err)
 			panic(err)
 		}
+		proxy.Printf("CA's key and cert saved in '%s'.", utils.BinDir)
 		proxy.Printf("Copy and register the created 'cert.pem' with your client.")
 	}
 	if err := utils.LoadCA(certPath, keyPath); err != nil {
