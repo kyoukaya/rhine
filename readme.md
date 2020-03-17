@@ -1,17 +1,22 @@
-# Rhine
+# rhine
 
-Rhine is a modular framework for intercepting, processing, and dispatching game traffic for Arknight's global, Japanese and Korean servers by means of a HTTPS proxy.
-Optionally, Rhine can also block requests to telemetry or ad domains frequently contacted when using an android emulator.
+rhine is a modular framework for intercepting, processing, and dispatching game traffic for Arknight's global, Japanese and Korean servers by means of a HTTPS proxy.
+Another core functionality of rhine is to mirror the game state of the client by inspection of HTTPS traffic, allowing modules insight into the exact state and changes to the state of the client.
+Optionally, rhine can also block requests to telemetry or ad domains frequently contacted when using an android emulator.
 
 ## Usage
 
-While Rhine is intended to be used as a framework on which developers can write their own programs, an example program is provided as [`cmd/example/rhine.go`](https://github.com/kyoukaya/rhine/blob/master/cmd/example/rhine.go) which initializes the `packetlogger` and `droplogger` modules so that developers can give it a spin.
-Execute `go run cmd/example/rhine.go` to start the proxy server, and then direct your client to use it. You will be required to install a generated root CA on your emulator/device so that Rhine will be able to listen in on the HTTPS game traffic.
+While rhine is intended to be used as a framework on which developers can write their own programs, an example program is provided as [`cmd/example/rhine.go`](https://github.com/kyoukaya/rhine/blob/master/cmd/example/rhine.go) which initializes the `packetlogger` and `droplogger` modules so that developers can give it a spin.
+Run `go build cmd/example/rhine.go && ./rhine.exe` to build and run the proxy server, and then direct your client to use it.
+You will be required to install the generated root CA on your emulator/device so that rhine will be able to listen in on the HTTPS game traffic.
 
-## Modules
+## Example Modules
 
 The 2 provided example modules in this repository are pretty self explanatory, `packetlogger` logs the raw body of each game packet, while `droplogger` logs the drops from each battle.
-Besides the modules provided in this repository, you can also try out the [ak-discordrpc](https://github.com/kyoukaya/ak-discordrpc) module.
+
+Besides the modules provided in this repository, you can also try out:
+- [ak-discordrpc](https://github.com/kyoukaya/ak-discordrpc) - a Discord rich presence client for Arknights.
+- [angelina](https://github.com/kyoukaya/angelina) - websocket interface for rhine allowing packet and gamestate hooks.
 
 ## Development
 
@@ -52,12 +57,12 @@ func init() {
 }
 ```
 
-## Background and Future Plans
+## Background
 
-A lot of the code for Rhine came from [Hoxy](https://github.com/kyoukaya/hoxy), a previous attempt at this concept which didn't work out so well as it tried to marshal every single packet sent and received by the client, which caused many development problems. The situation in Arknights is however slightly different, as most packets received by the client affect the client in a very programmatic way, it essentially sends delta patches in the form of JSON objects. This lets us model mirror the client's game state a lot easier without perfectly marshalling all the packets.
+A lot of the code for rhine came from [Hoxy](https://github.com/kyoukaya/hoxy), a previous attempt at this concept which didn't work out so well as it tried to marshal every single packet sent and received by the client, which caused many development problems.
+The situation in Arknights is however slightly different, as most packets received by the client affect the client in a programmatic way.
+Arknight's game servers send delta patches in the form of JSON objects to modify and delete aspects of the game state.
+This lets us model mirror the client's game state a lot easier without perfectly marshalling all the packets.
 
-Mirroring the client's game state is exactly the goal of the gamestate module, though at the moment it only unmarshalls the initial synchronization packet and stores it. A good amount of reflection will be required to apply the delta patches sent by the server, but it's high on my priority. Once, completed, gamestate would enable a KancolleViewer-like application which is always something I wanted to do as well.
-
-Higher on my priority though, is porting [ArkPlanner](https://github.com/ycremar/ArkPlanner) to go, combined with the data available to Rhine, mods will make one's farm a lot easier than inputting it into the website.
-
-If you're interested in Rhine and want to talk to me about it, message me on discord @ kyoukaya#6240. Might make a server if there's any interest.
+## Contact
+If you're interested in rhine and want to talk to me about it, message me on Discord @kyoukaya#6240, or join the [discord server](https://discord.gg/zXhE7vA)!
