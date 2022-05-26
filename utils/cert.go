@@ -3,8 +3,8 @@ package utils
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"io/ioutil"
 	"os"
+	"path"
 
 	"github.com/elazarl/goproxy"
 )
@@ -12,22 +12,11 @@ import (
 // LoadCA loads the cert and RSA key pair from the specified paths and configures
 // goproxy to use it.
 func LoadCA(certPath, keyPath string) error {
-	var err error
-	certFile, err := os.Open(BinDir + certPath)
+	caCert, err := os.ReadFile(path.Join(BinDir, certPath))
 	if err != nil {
 		return err
 	}
-	defer certFile.Close()
-	keyFile, err := os.Open(BinDir + keyPath)
-	if err != nil {
-		return err
-	}
-	defer keyFile.Close()
-	caCert, err := ioutil.ReadAll(certFile)
-	if err != nil {
-		return err
-	}
-	caKey, err := ioutil.ReadAll(keyFile)
+	caKey, err := os.ReadFile(path.Join(BinDir, keyPath))
 	if err != nil {
 		return err
 	}

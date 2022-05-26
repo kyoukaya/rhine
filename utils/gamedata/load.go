@@ -22,7 +22,6 @@ import (
 )
 
 const (
-	excelPathFmt   = "%s/data/%s/gamedata/excel/%s.json"
 	rawBaseURL     = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/"
 	maxConnections = 4
 )
@@ -88,7 +87,7 @@ func updateGameData(l log.Logger) {
 	// Sort the lines for consistent output
 	sort.Strings(lines)
 	// write .version file
-	f, err := os.Create(utils.BinDir + "/data/.version")
+	f, err := os.Create(path.Join(utils.BinDir, "data/.version"))
 	if err != nil {
 		l.Warnln(err)
 		return
@@ -149,7 +148,7 @@ func getAndUpdate(wg *sync.WaitGroup, jobs chan string, etags chan string,
 			errs <- err
 			continue
 		}
-		fileName := utils.BinDir + "/data/" + reqPath
+		fileName := path.Join(utils.BinDir, "data", reqPath)
 		err = os.MkdirAll(path.Dir(fileName), 0755)
 		if err != nil {
 			errs <- err
@@ -175,7 +174,7 @@ func getAndUpdate(wg *sync.WaitGroup, jobs chan string, etags chan string,
 func loadVersionFile() map[string]string {
 	ret := make(map[string]string)
 	bindir := utils.BinDir
-	verPath := bindir + "/data/.version"
+	verPath := path.Join(bindir, "/data/.version")
 	_, err := os.Stat(verPath)
 	if os.IsNotExist(err) {
 		return ret
@@ -202,11 +201,7 @@ func loadVersionFile() map[string]string {
 func loadExcelJSON(region, table string) []byte {
 	fileMutex.Lock()
 	defer fileMutex.Unlock()
-	f, err := os.Open(fmt.Sprintf(
-		excelPathFmt, utils.BinDir, regionMap[region], table))
-	utils.Check(err)
-	defer f.Close()
-	b, err := ioutil.ReadAll(f)
+	b, err := os.ReadFile(path.Join(utils.BinDir, "data", regionMap[region], "excel", table+".json"))
 	utils.Check(err)
 	return b
 }

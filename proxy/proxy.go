@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -112,8 +113,8 @@ func NewProxy(options *Options) *Proxy {
 	server.OnRequest().DoFunc(proxy.HandleReq)
 	server.OnResponse().DoFunc(proxy.HandleResp)
 
-	_, certStatErr := os.Stat(utils.BinDir + certPath)
-	_, keyStatErr := os.Stat(utils.BinDir + keyPath)
+	_, certStatErr := os.Stat(path.Join(utils.BinDir, certPath))
+	_, keyStatErr := os.Stat(path.Join(utils.BinDir, keyPath))
 	// Generate CA if it doesn't exist
 	if os.IsNotExist(certStatErr) || os.IsNotExist(keyStatErr) {
 		proxy.Printf("Generating CA...")
@@ -128,6 +129,7 @@ func NewProxy(options *Options) *Proxy {
 		proxy.Warnln(err)
 		panic(err)
 	}
+
 	server.OnRequest().HandleConnect(goproxy.FuncHttpsHandler(proxy.httpsHandler))
 	return proxy
 }
@@ -163,8 +165,8 @@ func (p *Proxy) Start() {
 	go func() {
 		<-sigs
 		p.Printf("Shutting down.\n")
-		p.Flush()
 		p.Shutdown()
+		p.Flush()
 		os.Exit(0)
 	}()
 
@@ -178,6 +180,7 @@ func (p *Proxy) Start() {
 		cb(p.Logger)
 	}
 
+	p.Printf("Loaded CA %x", goproxy.GoproxyCa.Leaf.SerialNumber.Bytes())
 	p.Printf("proxy server listening on %s", ipstring)
 	err := http.ListenAndServe(p.options.Address, p.server)
 	p.Warnln(err)

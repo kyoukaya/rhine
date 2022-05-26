@@ -11,6 +11,7 @@ import (
 	"math/big"
 	"net"
 	"os"
+	"path"
 	"time"
 )
 
@@ -86,20 +87,9 @@ func GenerateCA(certPath, keyPath string) error {
 	rootKeyPEM := pem.EncodeToMemory(&pem.Block{
 		Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(rootKey),
 	})
-	f, err := os.Create(BinDir + certPath)
-	if err != nil {
-		return fmt.Errorf("error writing cert to file: %v", err)
-	}
 
-	_, err = f.Write(rootCertPEM)
-	check(err)
+	check(os.WriteFile(path.Join(BinDir, certPath), rootCertPEM, 0666))
+	check(os.WriteFile(path.Join(BinDir, keyPath), rootKeyPEM, 0666))
 
-	f, err = os.Create(BinDir + keyPath)
-	if err != nil {
-		return fmt.Errorf("error writing key to file: %v", err)
-	}
-
-	_, err = f.Write(rootKeyPEM)
-	check(err)
 	return nil
 }

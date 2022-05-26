@@ -6,9 +6,9 @@ package packetlogger
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
+	"path"
 	"strconv"
 	"time"
 
@@ -37,11 +37,11 @@ func (state *rawPacketLoggerState) Shutdown(bool) {
 }
 
 func initFunc(mod *proxy.RhineModule) {
-	dir := fmt.Sprintf("%s/logs/%s/%s_%s/", utils.BinDir, modName, mod.Region, strconv.Itoa(mod.UID))
+	dir := path.Join(utils.BinDir, "logs", modName, mod.Region, strconv.Itoa(mod.UID))
 	err := os.MkdirAll(dir, 0755)
 	utils.Check(err)
 	now := time.Now()
-	f, err := os.Create(fmt.Sprintf("%s%s.log", dir, now.Format("2006-01-02_15.04.05")))
+	f, err := os.Create(path.Join(dir, now.Format("2006-01-02_15.04.05")+".log"))
 	utils.Check(err)
 	buffer := bufio.NewWriter(f)
 	logger := log.New(buffer, "", log.Ltime)

@@ -4,9 +4,9 @@ package droplogger
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"sync"
@@ -129,10 +129,10 @@ func (mod *modState) battleStartHandler(op string, data []byte, ctx *goproxy.Pro
 }
 
 func initFunc(mod *proxy.RhineModule) {
-	dir := fmt.Sprintf("%s/logs/%s/", utils.BinDir, modName)
+	dir := path.Join(utils.BinDir, "logs", modName)
 	err := os.MkdirAll(dir, 0755)
 	utils.Check(err)
-	f, err := os.OpenFile(fmt.Sprintf("%s%s_%s.log", dir, mod.Region, strconv.Itoa(mod.UID)),
+	f, err := os.OpenFile(path.Join(dir, mod.Region+"_"+strconv.Itoa(mod.UID)+".log"),
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 	utils.Check(err)
 	defer f.Close()

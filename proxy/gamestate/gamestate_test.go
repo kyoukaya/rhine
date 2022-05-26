@@ -2,7 +2,7 @@ package gamestate
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/kyoukaya/rhine/proxy/gamestate/statestruct"
@@ -25,7 +25,7 @@ func check(t *testing.T, err error) {
 }
 
 func openAndRead(t *testing.T, filename string) []byte {
-	b, err := ioutil.ReadFile(filename)
+	b, err := os.ReadFile(filename)
 	check(t, err)
 	return b
 }

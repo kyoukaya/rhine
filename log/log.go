@@ -50,9 +50,9 @@ func New(stdOut, verbose bool, filePath string, flags int) Logger {
 		return logger
 	}
 	if filePath == "" {
-		filePath = utils.BinDir + "/logs/proxy.log"
+		filePath = path.Join(utils.BinDir, "/logs/proxy.log")
 	} else if !path.IsAbs(filePath) {
-		filePath = utils.BinDir + "/" + filePath
+		filePath = path.Join(utils.BinDir, filePath)
 	}
 	dir := path.Dir(filePath)
 	err := os.MkdirAll(dir, 0755)
