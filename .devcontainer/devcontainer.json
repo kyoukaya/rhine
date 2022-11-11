@@ -1,6 +1,3 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/base:alpine",
-  "features": {
-    "ghcr.io/devcontainers/features/go": {}
-  }
+  "image": "mcr.microsoft.com/devcontainers/go:1.19"
 }
